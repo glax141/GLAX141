@@ -1,10 +1,10 @@
 /**
  * GLAX 摄影作品集 - 配置文件
- * 最后更新: 2026/3/17 16:55:08
+ * 最后更新: 2026/3/17 16:58:27
  */
 
 export const HOME_CONFIG = {
-  heroImage: 'https://raw.githubusercontent.com/glax141/glax/refs/heads/main/glax-hero.jpg',
+  heroImage: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/hero/1773737900844_g53ef.jpg',
 };
 
 export const ABOUT_CONFIG = {
