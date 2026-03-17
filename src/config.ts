@@ -1,10 +1,10 @@
 /**
  * GLAX 摄影作品集 - 配置文件
- * 最后更新: 2026/3/17 16:53:19
+ * 最后更新: 2026/3/17 16:54:59
  */
 
 export const HOME_CONFIG = {
-  heroImage: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1920&h=1080&fit=crop',
+  heroImage: 'https://raw.githubusercontent.com/glax141/glax/refs/heads/main/glax-hero.jpg',
 };
 
 export const ABOUT_CONFIG = {
@@ -39,16 +39,9 @@ export const PROJECTS: Project[] = [
     titleEn: 'Portrait & Fashion',
     description: '纯粹人像与服装摄影，捕捉时尚的本质与灵魂。在这个系列中，我探索人与服装之间的关系，用镜头讲述每一个穿着背后的故事。光线、构图、情绪——一切都在瞬间定格。',
     descriptionEn: 'Pure portrait and fashion photography, capturing the essence and soul of style.',
-    cover: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&h=1000&fit=crop',
+    cover: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773737640537_ymxuh.jpg',
     images: [
-      'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1502716119720-b23a1e3b2b22?w=1200&h=800&fit=crop',
+
     ],
   },
   {
@@ -59,17 +52,6 @@ export const PROJECTS: Project[] = [
     descriptionEn: 'Still life photography, focusing on the beauty of products — shoes, clothing, jewelry.',
     cover: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=1000&fit=crop',
     images: [
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=1200&h=800&fit=crop',
       'https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=1200&h=800&fit=crop',
     ],
   },
@@ -79,14 +61,9 @@ export const PROJECTS: Project[] = [
     titleEn: 'Fashion Editorial',
     description: '创意时尚杂志作品，打破常规边界。这个系列是与顶级时尚杂志的合作成果，探索先锋设计与传统美学的碰撞融合。每一次拍摄都是一场视觉革命。',
     descriptionEn: 'Creative fashion editorial works, breaking conventional boundaries.',
-    cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=1000&fit=crop',
+    cover: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773737677447_jivvf.jpg',
     images: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1504703395950-b89145a5425b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&h=800&fit=crop',
+
     ],
   }
 ];
