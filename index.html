@@ -5,8 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GLAX - 商业/时尚摄影师 | Commercial Fashion Photographer</title>
     <meta name="description" content="GLAX - 商业时尚摄影师，专注于人像、服装、产品摄影" />
+    
+    <!-- 性能优化：DNS 预解析 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    
+    <!-- 性能优化：预加载关键资源 -->
+    <link rel="preload" href="/images/lookbook/cover.jpg" as="image" fetchpriority="high">
+    
+    <!-- 性能优化：浏览器缓存控制 -->
+    <meta http-equiv="Cache-Control" content="public, max-age=31536000, immutable">
+    
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100;200;300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
       /* 首屏加载样式 - 避免白屏 */
