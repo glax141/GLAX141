@@ -1,6 +1,6 @@
 /**
  * GLAX 摄影作品集 - 配置文件
- * 最后更新: 2026/3/17 16:58:27
+ * 最后更新: 2026/3/17 17:01:36
  */
 
 export const HOME_CONFIG = {
@@ -41,7 +41,17 @@ export const PROJECTS: Project[] = [
     descriptionEn: 'Pure portrait and fashion photography, capturing the essence and soul of style.',
     cover: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773737640537_ymxuh.jpg',
     images: [
-
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738009566_ro49x.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738016425_29d0o.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738023245_ia4c4.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738029190_ht15e.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738037063_qk5xh.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738046163_2s0je.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738052673_ryalm.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738058334_io5y5.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738061474_ox8zr.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738065970_txzp0.jpg',
+      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738074360_bv79b.jpg',
     ],
   },
   {
@@ -50,9 +60,11 @@ export const PROJECTS: Project[] = [
     titleEn: 'Still Life',
     description: '静物摄影，专注于产品之美。在这个系列中，每一件物品都被赋予生命——精致的鞋子、优雅的服装、闪耀的首饰。我追求的是让观者感受到物品的温度与质感。',
     descriptionEn: 'Still life photography, focusing on the beauty of products — shoes, clothing, jewelry.',
-    cover: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=1000&fit=crop',
+    cover: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738033352_m5rx0.jpg',
     images: [
-      'https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=1200&h=800&fit=crop',
+      '',
+      '',
+      '',
     ],
   },
   {
