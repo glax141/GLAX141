@@ -5,6 +5,7 @@ import {
   PROJECTS,
   STATS,
   ADMIN_PASSWORD_HASH,
+  GIST_CONFIG,
   type Project,
 } from './config';
 
@@ -237,6 +238,7 @@ function AdminPanel({
   const [syncStatus, setSyncStatus] = useState('');
   const [saveStatus, setSaveStatus] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
+  const [newGistIdForCopy, setNewGistIdForCopy] = useState('');
 
   // 标记有改动
   const markChanged = () => setHasChanges(true);
@@ -257,11 +259,11 @@ function AdminPanel({
       return;
     }
     localStorage.setItem('gist_token', gistToken.trim());
-    setSyncStatus('✅ Token 已保存');
-    setTimeout(() => setSyncStatus(''), 2000);
+    setSyncStatus('✅ Token 已保存！现在可以点击「同步到云端」');
+    setTimeout(() => setSyncStatus(''), 3000);
   };
 
-  // ☁️ 同步到 Gist
+  // ☁️ 同步到 Gist（改为公开 Gist，所有设备无需 Token 可读取）
   const handleSyncToGist = async () => {
     const token = gistToken.trim() || localStorage.getItem('gist_token') || '';
     if (!token) {
@@ -295,11 +297,12 @@ function AdminPanel({
         return;
       }
 
+      // ✅ 关键修复：改为公开 Gist，所有设备无需 Token 可读取
       const gistBody = {
-        description: 'GLAX Photography Website Data',
-        public: false,
+        description: 'GLAX Photography Website Data - Public',
+        public: true,
         files: {
-          'website-data.json': { content: jsonStr },
+          'glax-website-data.json': { content: jsonStr },
         },
       };
 
@@ -318,7 +321,7 @@ function AdminPanel({
           body: JSON.stringify(gistBody),
         });
       } else {
-        console.log('🆕 创建新 Gist');
+        console.log('🆕 创建新公开 Gist');
         response = await fetch('https://api.github.com/gists', {
           method: 'POST',
           headers: {
@@ -335,41 +338,43 @@ function AdminPanel({
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         const msg = (err as any).message || `HTTP ${response.status}`;
-        if (response.status === 401) throw new Error('Token 无效或已过期，请重新生成');
-        if (response.status === 403) throw new Error('Token 没有 gist 权限，请勾选 gist 权限');
+        if (response.status === 401) throw new Error('Token 无效或已过期，请重新生成 Token');
+        if (response.status === 403) throw new Error('Token 没有 gist 权限，创建 Token 时请勾选 gist');
         if (response.status === 422) throw new Error('数据格式错误');
         throw new Error(msg);
       }
 
       const result = await response.json();
       const newGistId = result.id;
-      console.log('✅ Gist ID:', newGistId);
+      console.log('✅ 公开 Gist ID:', newGistId);
 
       setGistId(newGistId);
       localStorage.setItem('gist_id', newGistId);
       localStorage.setItem('gist_token', token);
 
-      setSyncStatus(`✅ 云端同步成功！其他设备刷新页面即可看到更新（数据: ${sizeKB}KB）`);
-      setTimeout(() => setSyncStatus(''), 6000);
+      // ✅ 关键：同步成功后提示用户把 Gist ID 填入 config.ts
+      setSyncStatus(`✅ 同步成功！Gist ID: ${newGistId}（请复制此 ID 填入 config.ts 的 publicGistId）`);
+      setNewGistIdForCopy(newGistId);
+      setTimeout(() => setSyncStatus(''), 15000);
     } catch (error: any) {
       console.error('❌ Gist 同步错误:', error);
       let msg = error.message || '未知错误';
       if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-        msg = '网络错误：无法连接 GitHub，请检查网络或开启 VPN';
+        msg = '网络错误：无法连接 GitHub，请检查网络连接';
       }
       setSyncStatus(`❌ 同步失败：${msg}`);
-      setTimeout(() => setSyncStatus(''), 8000);
+      setTimeout(() => setSyncStatus(''), 10000);
     } finally {
       setSyncing(false);
     }
   };
 
-  // 从 Gist 加载
+  // 从 Gist 加载（支持公开读取，无需 Token）
   const handleLoadFromGist = async () => {
-    const token = gistToken.trim() || localStorage.getItem('gist_token') || '';
-    const id = gistId || localStorage.getItem('gist_id') || '';
-    if (!token || !id) {
-      setSyncStatus('❌ 请先配置 Token 并同步过数据');
+    // 优先用已知 gist_id，其次用 config 里的 publicGistId
+    const id = gistId || localStorage.getItem('gist_id') || GIST_CONFIG.publicGistId || '';
+    if (!id) {
+      setSyncStatus('❌ 没有 Gist ID，请先同步一次');
       return;
     }
 
@@ -377,17 +382,22 @@ function AdminPanel({
     setSyncStatus('⏳ 从云端加载中...');
 
     try {
-      const response = await fetch(`https://api.github.com/gists/${id}`, {
-        headers: {
-          Authorization: `token ${token}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-      });
+      // 公开 Gist 无需 Token 即可读取
+      const token = gistToken.trim() || localStorage.getItem('gist_token') || '';
+      const headers: Record<string, string> = {
+        Accept: 'application/vnd.github.v3+json',
+      };
+      if (token) headers['Authorization'] = `token ${token}`;
+
+      const response = await fetch(`https://api.github.com/gists/${id}`, { headers });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const gist = await response.json();
-      const content = gist.files['website-data.json']?.content;
+      // 兼容新旧文件名
+      const content =
+        gist.files['glax-website-data.json']?.content ||
+        gist.files['website-data.json']?.content;
       if (!content) throw new Error('Gist 中没有数据文件');
 
       const data = JSON.parse(content);
@@ -395,8 +405,8 @@ function AdminPanel({
       if (data.home) setHome(data.home);
       if (data.projects) setProjects(data.projects);
 
-      saveLocalData(data.about, data.home, data.projects);
-      onDataSaved(data.about, data.home, data.projects);
+      saveLocalData(data.about || about, data.home || home, data.projects || projects);
+      onDataSaved(data.about || about, data.home || home, data.projects || projects);
 
       setSyncStatus('✅ 从云端加载成功！页面已更新');
       setTimeout(() => setSyncStatus(''), 4000);
@@ -541,20 +551,27 @@ function AdminPanel({
             云端同步设置
             <span className="text-white/30 text-xs">GitHub Gist Sync</span>
           </h3>
-          <p className="text-white/40 text-xs mb-4">
-            配置后可跨设备同步。需要 GitHub Token（只需勾选 gist 权限）—
+          {/* 步骤说明 */}
+          <div className="bg-white/5 rounded-lg px-4 py-3 mb-4 text-xs text-white/50 space-y-1">
+            <p className="text-white/70 font-medium mb-2">📋 使用步骤（首次配置）：</p>
+            <p>① 点击下方链接创建 GitHub Token（勾选 <code className="bg-white/10 px-1 rounded">gist</code> 权限）</p>
+            <p>② 粘贴 Token → 点击「保存 Token」</p>
+            <p>③ 修改内容后点击「☁️ 同步到云端」</p>
+            <p>④ 同步成功后复制 Gist ID → 填入 <code className="bg-white/10 px-1 rounded">config.ts</code> → 推送 GitHub</p>
+            <p>⑤ 以后所有设备打开网站自动加载最新内容 ✅</p>
             <a
-              href="https://github.com/settings/tokens/new?description=GLAX+Website&scopes=gist"
+              href="https://github.com/settings/tokens/new?description=GLAX+Website+Sync&scopes=gist"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:underline ml-1"
+              className="inline-block mt-1 text-blue-400 hover:text-blue-300 underline"
             >
-              点击直接创建 Token →
+              → 点击创建 GitHub Token（勾选 gist 权限）
             </a>
-          </p>
+          </div>
 
           <div className="space-y-3">
-            <div className="flex gap-3">
+            {/* Token 输入 */}
+            <div className="flex gap-2">
               <input
                 type="password"
                 value={gistToken}
@@ -564,14 +581,25 @@ function AdminPanel({
               />
               <MagnetButton
                 onClick={handleSaveToken}
-                className="px-4 py-2.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-all whitespace-nowrap"
+                className="px-4 py-2.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/20 rounded-lg text-sm transition-all whitespace-nowrap"
               >
-                保存 Token
+                ✓ 保存 Token
+              </MagnetButton>
+            </div>
+
+            {/* 同步按钮 */}
+            <div className="flex gap-2">
+              <MagnetButton
+                onClick={handleSyncToGist}
+                disabled={syncing || !gistToken.trim()}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/20 rounded-lg text-sm transition-all disabled:opacity-40"
+              >
+                {syncing ? '⏳ 同步中...' : '☁️ 同步到云端（其他设备可见）'}
               </MagnetButton>
               <MagnetButton
                 onClick={handleLoadFromGist}
-                disabled={syncing || !gistToken || !gistId}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm transition-all disabled:opacity-40 whitespace-nowrap"
+                disabled={syncing}
+                className="flex items-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 text-white/60 border border-white/10 rounded-lg text-sm transition-all disabled:opacity-40 whitespace-nowrap"
               >
                 <I.Refresh />
                 从云端加载
@@ -579,9 +607,33 @@ function AdminPanel({
             </div>
 
             {gistId && (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-2 flex items-center gap-2">
-                <span className="text-green-400 text-xs">✅ 已连接 Gist：</span>
-                <span className="text-white/50 text-xs font-mono">{gistId}</span>
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-green-400 text-xs">✅ 已连接 Gist ID：</span>
+                  <span className="text-white/70 text-xs font-mono">{gistId}</span>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(gistId); setSyncStatus('✅ Gist ID 已复制！'); setTimeout(() => setSyncStatus(''), 2000); }}
+                    className="ml-auto text-xs bg-white/10 hover:bg-white/20 text-white/60 px-2 py-1 rounded transition-all"
+                  >
+                    复制 ID
+                  </button>
+                </div>
+                <div className="text-yellow-400/80 text-xs leading-relaxed">
+                  ⚠️ <strong>重要：</strong>请复制上方 Gist ID，填入 GitHub 仓库中 <code className="bg-white/10 px-1 rounded">src/config.ts</code> 的 <code className="bg-white/10 px-1 rounded">publicGistId: '填入这里'</code>，然后推送到 GitHub。这样所有设备无需 Token 就能自动加载最新数据！
+                </div>
+              </div>
+            )}
+            {newGistIdForCopy && (
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg px-4 py-3">
+                <p className="text-blue-400 text-xs font-bold mb-1">🎉 首次同步成功！请完成以下步骤实现跨设备同步：</p>
+                <ol className="text-white/60 text-xs space-y-1 list-decimal list-inside">
+                  <li>复制 Gist ID：<code className="bg-white/10 px-1 rounded font-mono text-white/80">{newGistIdForCopy}</code>
+                    <button onClick={() => { navigator.clipboard.writeText(newGistIdForCopy); setSyncStatus('✅ 已复制！'); setTimeout(() => setSyncStatus(''), 2000); }} className="ml-2 text-blue-400 underline text-xs">点击复制</button>
+                  </li>
+                  <li>打开 GitHub 仓库 → <code className="bg-white/10 px-1 rounded">src/config.ts</code></li>
+                  <li>找到 <code className="bg-white/10 px-1 rounded">publicGistId: ''</code> 改为 <code className="bg-white/10 px-1 rounded">publicGistId: '{newGistIdForCopy}'</code></li>
+                  <li>提交推送 → GitHub 自动重新部署 → 所有设备自动同步！✅</li>
+                </ol>
               </div>
             )}
           </div>
@@ -875,19 +927,29 @@ export default function App() {
   // 动态数据
   const [siteData, setSiteData] = useState(() => loadLocalData());
 
-  // 启动时从 Gist 加载（如果已配置）
+  // 启动时从 Gist 加载
+  // ✅ 支持公开 Gist（无需 Token），所有设备都能自动同步
   useEffect(() => {
-    const token = localStorage.getItem('gist_token');
-    const gistId = localStorage.getItem('gist_id');
-    if (!token || !gistId) return;
+    // 优先用 config.ts 里的 publicGistId（推荐方式，所有设备自动同步）
+    // 其次用 localStorage 里的 gist_id
+    const id = GIST_CONFIG.publicGistId || localStorage.getItem('gist_id') || '';
+    if (!id) return;
 
-    fetch(`https://api.github.com/gists/${gistId}`, {
-      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' },
-    })
+    const token = localStorage.getItem('gist_token') || '';
+    const headers: Record<string, string> = {
+      Accept: 'application/vnd.github.v3+json',
+    };
+    // 有 Token 就带上，没有也能读取公开 Gist
+    if (token) headers['Authorization'] = `token ${token}`;
+
+    fetch(`https://api.github.com/gists/${id}`, { headers })
       .then((r) => r.ok ? r.json() : null)
       .then((gist) => {
         if (!gist) return;
-        const content = gist.files['website-data.json']?.content;
+        // 兼容新旧文件名
+        const content =
+          gist.files['glax-website-data.json']?.content ||
+          gist.files['website-data.json']?.content;
         if (!content) return;
         const data = JSON.parse(content);
         const newData = {
@@ -897,9 +959,9 @@ export default function App() {
         };
         setSiteData(newData);
         saveLocalData(newData.about, newData.home, newData.projects);
-        console.log('✅ 已从 Gist 加载最新数据');
+        console.log('✅ 已从公开 Gist 加载最新数据，时间:', data.updatedAt);
       })
-      .catch((err) => console.warn('⚠️ Gist 加载失败（使用本地缓存）:', err));
+      .catch((err) => console.warn('⚠️ Gist 加载失败（使用本地/默认数据）:', err));
   }, []);
 
   // 后台保存回调

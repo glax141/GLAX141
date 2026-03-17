@@ -132,7 +132,9 @@ export const ADMIN_PASSWORD_HASH = 'a31e84082e81e1499d0ab37bb2a9e612f97b646a6881
 // ☁️ GitHub Gist 云同步配置
 // ============================================
 export const GIST_CONFIG = {
-  // Gist ID 会在首次同步时自动生成并保存到 localStorage
-  // Token 需要在后台管理面板中配置（保存在 localStorage，不会提交到代码）
+  // ⚠️ 首次同步成功后，把生成的 Gist ID 填入这里
+  // 这样所有设备无需 Token 就能自动加载最新数据
+  // 例如: publicGistId: 'abc123def456'
+  publicGistId: '',
   enabled: true,
 };
