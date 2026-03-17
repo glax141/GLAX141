@@ -1,6 +1,6 @@
 /**
  * GLAX 摄影作品集 - 配置文件
- * 最后更新: 2026/3/17 17:57:22
+ * 最后更新: 2026/3/17 18:19:39
  */
 
 export const HOME_CONFIG = {
@@ -221,7 +221,6 @@ export const PROJECTS: Project[] = [
       'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738568081_oe0gs.jpg',
       'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738572243_st6lf.jpg',
       'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738586094_r9x2o.jpg',
-      'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738595829_svhoh.jpg',
       'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738606021_maz8u.jpg',
       'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738617960_vvqwx.jpg',
       'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738633933_gdt23.jpg',
