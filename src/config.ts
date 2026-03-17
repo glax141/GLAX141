@@ -1,29 +1,12 @@
 /**
- * ============================================
- * GLAX 摄影作品集 - 唯一配置文件
- * ============================================
- * 
- * 📌 所有网站内容都在这个文件中配置
- * 📌 修改后推送到 GitHub，网站会自动更新
- * 
- * 🖼️ 图片链接推荐方式：
- *   方式1: 上传到 GitHub 仓库，使用 jsDelivr CDN
- *          https://cdn.jsdelivr.net/gh/用户名/仓库名@main/路径/图片.jpg
- *   方式2: 使用免费图床 (imgbb, cloudinary 等)
- *   方式3: 使用 Unsplash 等免费图片链接
+ * GLAX 摄影作品集 - 配置文件
+ * 最后更新: 2026/3/17 16:53:19
  */
 
-// ============================================
-// 🏠 首页设置
-// ============================================
 export const HOME_CONFIG = {
-  // 主页全屏背景大图
   heroImage: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1920&h=1080&fit=crop',
 };
 
-// ============================================
-// 👤 关于我
-// ============================================
 export const ABOUT_CONFIG = {
   name: 'GLAX',
   title: '商业 / 时尚摄影师',
@@ -39,17 +22,14 @@ export const ABOUT_CONFIG = {
   wechat: 'GLAX141',
 };
 
-// ============================================
-// 🖼️ 项目配置
-// ============================================
 export interface Project {
   id: string;
   title: string;
   titleEn: string;
   description: string;
   descriptionEn: string;
-  cover: string;       // 封面图
-  images: string[];    // 全部作品图片
+  cover: string;
+  images: string[];
 }
 
 export const PROJECTS: Project[] = [
@@ -108,33 +88,18 @@ export const PROJECTS: Project[] = [
       'https://images.unsplash.com/photo-1504703395950-b89145a5425b?w=1200&h=800&fit=crop',
       'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&h=800&fit=crop',
     ],
-  },
+  }
 ];
 
-// ============================================
-// 📊 统计数据
-// ============================================
 export const STATS = [
   { value: '10+', label: '年经验', labelEn: 'Years' },
   { value: '200+', label: '合作客户', labelEn: 'Clients' },
   { value: '500+', label: '作品数量', labelEn: 'Works' },
 ];
 
-// ============================================
-// 🔑 后台密码（SHA-256 加密存储，不显示明文）
-// ============================================
-// 如需修改密码，请在浏览器控制台运行以下命令获取新密码的哈希值：
-// crypto.subtle.digest('SHA-256', new TextEncoder().encode('你的新密码')).then(b => console.log(Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2,'0')).join('')))
-// 然后将下方哈希值替换即可
 export const ADMIN_PASSWORD_HASH = 'a31e84082e81e1499d0ab37bb2a9e612f97b646a6881e0b6e3563e181e3e87f6';
 
-// ============================================
-// ☁️ GitHub Gist 云同步配置
-// ============================================
 export const GIST_CONFIG = {
-  // ⚠️ 首次同步成功后，把生成的 Gist ID 填入这里
-  // 这样所有设备无需 Token 就能自动加载最新数据
-  // 例如: publicGistId: 'abc123def456'
   publicGistId: '',
   enabled: true,
 };
