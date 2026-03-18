@@ -333,7 +333,8 @@ export const PROJECTS: Project[] = [
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739710702_94f8b.jpg",
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739728313_ywk7d.jpg",
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773804942815.jpg",
-      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773805075713.jpg"
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773805075713.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773805973467.jpg"
     ]
   }
 ];
