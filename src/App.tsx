@@ -291,21 +291,27 @@ async function loadImagesFromGitHub(): Promise<Partial<SiteData>> {
       const baseProject = { ...project, images: [...project.images] };
 
       if (project.id === 'lookbook' && lookbookFiles.length > 0) {
-        const sorted = [...lookbookFiles];
-        const coverFile = sorted.find((item) => item.name.toLowerCase().includes('cover')) || sorted[0];
-        const urls = sorted.map((item) => toCdnUrl(item.path));
+        const sorted = [...lookbookFiles].sort((a, b) => b.name.localeCompare(a.name));
+        const coverCandidates = sorted.filter((item) => item.name.toLowerCase().includes('cover'));
+        const coverFile = coverCandidates[0] || sorted[0];
+        const galleryFiles = sorted.filter((item) => item.path !== coverFile.path);
+        const urls = galleryFiles.map((item) => toCdnUrl(item.path));
         return { ...baseProject, cover: toCdnUrl(coverFile.path), images: urls };
       }
       if (project.id === 'still' && stillFiles.length > 0) {
-        const sorted = [...stillFiles];
-        const coverFile = sorted.find((item) => item.name.toLowerCase().includes('cover')) || sorted[0];
-        const urls = sorted.map((item) => toCdnUrl(item.path));
+        const sorted = [...stillFiles].sort((a, b) => b.name.localeCompare(a.name));
+        const coverCandidates = sorted.filter((item) => item.name.toLowerCase().includes('cover'));
+        const coverFile = coverCandidates[0] || sorted[0];
+        const galleryFiles = sorted.filter((item) => item.path !== coverFile.path);
+        const urls = galleryFiles.map((item) => toCdnUrl(item.path));
         return { ...baseProject, cover: toCdnUrl(coverFile.path), images: urls };
       }
       if (project.id === 'inside' && insideFiles.length > 0) {
-        const sorted = [...insideFiles];
-        const coverFile = sorted.find((item) => item.name.toLowerCase().includes('cover')) || sorted[0];
-        const urls = sorted.map((item) => toCdnUrl(item.path));
+        const sorted = [...insideFiles].sort((a, b) => b.name.localeCompare(a.name));
+        const coverCandidates = sorted.filter((item) => item.name.toLowerCase().includes('cover'));
+        const coverFile = coverCandidates[0] || sorted[0];
+        const galleryFiles = sorted.filter((item) => item.path !== coverFile.path);
+        const urls = galleryFiles.map((item) => toCdnUrl(item.path));
         return { ...baseProject, cover: toCdnUrl(coverFile.path), images: urls };
       }
 
@@ -381,6 +387,9 @@ function AdminPanel({ onClose }: any) {
   const [homeHeroImage, setHomeHeroImage] = useState(HOME_CONFIG.heroImage);
   const [aboutAvatar, setAboutAvatar] = useState(ABOUT_CONFIG.avatar);
   const [aboutBio, setAboutBio] = useState(ABOUT_CONFIG.bio.join('\n\n'));
+  const [contactEmail, setContactEmail] = useState(ABOUT_CONFIG.email);
+  const [contactInstagram, setContactInstagram] = useState(ABOUT_CONFIG.instagram);
+  const [contactWechat, setContactWechat] = useState(ABOUT_CONFIG.wechat);
   const [projects, setProjects] = useState(PROJECTS.map(p => ({ ...p, images: [...p.images] })));
   const [activeProjectId, setActiveProjectId] = useState(projects[0]?.id);
   const [currentPage, setCurrentPage] = useState(1);
@@ -392,6 +401,9 @@ function AdminPanel({ onClose }: any) {
     loadImagesFromGitHub().then((restored) => {
       if (restored.homeHeroImage) setHomeHeroImage(restored.homeHeroImage);
       if (restored.aboutAvatar) setAboutAvatar(restored.aboutAvatar);
+      if (restored.aboutEmail) setContactEmail(restored.aboutEmail);
+      if (restored.aboutInstagram) setContactInstagram(restored.aboutInstagram);
+      if (restored.aboutWechat) setContactWechat(restored.aboutWechat);
       if (restored.projects) setProjects(restored.projects.map((p) => ({ ...p, images: [...p.images] })));
     });
   }, []);
@@ -545,9 +557,9 @@ export const ABOUT_CONFIG = {
   title: '商业 / 时尚摄影师',
   avatar: '${aboutAvatar}',
   bio: ${JSON.stringify(aboutBio.split('\n\n'))},
-  email: 'contact@glax.com',
-  instagram: '@glax.photo',
-  wechat: 'glax141',
+  email: '${contactEmail}',
+  instagram: '${contactInstagram}',
+  wechat: '${contactWechat}',
 };
 
 // ============================================
@@ -559,9 +571,8 @@ export const PROJECTS: Project[] = ${JSON.stringify(projects, null, 2)};
 // 数据统计
 // ============================================
 export const STATS = [
-  { label: '年经验', value: '10+', labelEn: 'Years Experience' },
+  { label: '年经验', value: '5+', labelEn: 'Years Experience' },
   { label: '完成项目', value: '200+', labelEn: 'Projects Completed' },
-  { label: '国际奖项', value: '15+', labelEn: 'International Awards' },
   { label: '满意客户', value: '100%', labelEn: 'Satisfied Clients' },
 ];
 `;
@@ -747,8 +758,15 @@ export const STATS = [
                         onError={(e) => {
                           const target = e.currentTarget;
                           if (target.src.includes('cdn.jsdelivr.net')) {
-                            target.src = target.src
-                              .replace(`https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/`, `https://raw.githubusercontent.com/${username}/${repo}/${branch}/`);
+                            target.src = target.src.replace(
+                              `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/`,
+                              `https://raw.githubusercontent.com/${username}/${repo}/${branch}/`
+                            );
+                          } else if (target.src.includes('raw.githubusercontent.com')) {
+                            target.src = target.src.replace(
+                              `https://raw.githubusercontent.com/${username}/${repo}/${branch}/`,
+                              `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/`
+                            );
                           }
                         }}
                       />
@@ -855,19 +873,34 @@ export const STATS = [
           {activeTab === 'contact' && (
             <div className="bg-neutral-900/50 p-6 rounded-lg border border-neutral-800">
               <h3 className="text-lg text-white mb-4">联系方式</h3>
-              <p className="text-neutral-400 mb-4">联系方式在 config.ts 中配置，更新配置后会自动同步</p>
+              <p className="text-neutral-400 mb-4">修改后点击下方“更新配置到 GitHub”，刷新后前台会同步显示</p>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm text-neutral-400 mb-2">邮箱 Email</label>
-                  <input type="text" defaultValue="contact@glax.com" className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white" />
+                  <input
+                    type="text"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm text-neutral-400 mb-2">Instagram</label>
-                  <input type="text" defaultValue="@glax.photo" className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white" />
+                  <input
+                    type="text"
+                    value={contactInstagram}
+                    onChange={(e) => setContactInstagram(e.target.value)}
+                    className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm text-neutral-400 mb-2">微信 WeChat</label>
-                  <input type="text" defaultValue="glax141" className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white" />
+                  <input
+                    type="text"
+                    value={contactWechat}
+                    onChange={(e) => setContactWechat(e.target.value)}
+                    className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white"
+                  />
                 </div>
               </div>
             </div>
@@ -901,6 +934,7 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectDetailPage, setProjectDetailPage] = useState(1);
   const [carouselOffset, setCarouselOffset] = useState(0);
   const [siteData, setSiteData] = useState<SiteData>({
     homeHeroImage: HOME_CONFIG.heroImage,
@@ -953,6 +987,17 @@ export default function App() {
     alert('感谢您的留言！我会尽快回复您。\n\nThank you for your message! I will get back to you soon.');
     (e.target as HTMLFormElement).reset();
   };
+
+  const PROJECT_DETAIL_ITEMS_PER_PAGE = 10;
+  const projectDetailTotalPages = selectedProject
+    ? Math.ceil(selectedProject.images.length / PROJECT_DETAIL_ITEMS_PER_PAGE)
+    : 0;
+  const projectDetailImages = selectedProject
+    ? selectedProject.images.slice(
+        (projectDetailPage - 1) * PROJECT_DETAIL_ITEMS_PER_PAGE,
+        projectDetailPage * PROJECT_DETAIL_ITEMS_PER_PAGE
+      )
+    : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-neutral-900 to-black text-white">
@@ -1091,7 +1136,7 @@ export default function App() {
                 <div
                   key={project.id}
                   className="group cursor-pointer"
-                  onClick={() => setSelectedProject(project)}
+                  onClick={() => { setSelectedProject(project); setProjectDetailPage(1); }}
                 >
                   <div className="relative overflow-hidden rounded mb-4">
                     <img
@@ -1130,9 +1175,9 @@ export default function App() {
             <p className="text-neutral-400 mb-8">{selectedProject.description}</p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {selectedProject.images.slice(0, 8).map((img, idx) => (
+              {projectDetailImages.map((img, idx) => (
                 <img
-                  key={idx}
+                  key={`${projectDetailPage}-${idx}`}
                   src={img}
                   alt=""
                   className="w-full aspect-square object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
@@ -1144,11 +1189,29 @@ export default function App() {
               ))}
             </div>
 
-            {selectedProject.images.length > 8 && (
-              <p className="text-center text-neutral-400 mt-8">
-                共 {selectedProject.images.length} 张图片，显示前 8 张
-              </p>
+            {projectDetailTotalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <button
+                  onClick={() => setProjectDetailPage((p) => Math.max(1, p - 1))}
+                  disabled={projectDetailPage === 1}
+                  className="px-4 py-2 bg-neutral-800 disabled:opacity-50 rounded hover:bg-neutral-700"
+                >
+                  上一页
+                </button>
+                <span className="text-neutral-400">第 {projectDetailPage} / {projectDetailTotalPages} 页</span>
+                <button
+                  onClick={() => setProjectDetailPage((p) => Math.min(projectDetailTotalPages, p + 1))}
+                  disabled={projectDetailPage === projectDetailTotalPages}
+                  className="px-4 py-2 bg-neutral-800 disabled:opacity-50 rounded hover:bg-neutral-700"
+                >
+                  下一页
+                </button>
+              </div>
             )}
+
+            <p className="text-center text-neutral-400 mt-6">
+              共 {selectedProject.images.length} 张图片{projectDetailTotalPages > 1 ? `，当前第 ${projectDetailPage} 页` : ''}
+            </p>
           </div>
         </div>
       )}
