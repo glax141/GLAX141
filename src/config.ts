@@ -36,8 +36,8 @@ export const ABOUT_CONFIG = {
   title: '商业 / 时尚摄影师',
   avatar: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/avatar/1773738288058_j8ehc.jpg',
   bio: ["GLAX，商业与时尚领域的资深摄影师，拥有超过5年的影像创作经验。","我的镜头语言追求极致与纯粹，在光影的交织中捕捉瞬间的永恒。相信每一帧画面都是情感与故事的载体，用专业视角诠释商业价值，用艺术眼光定格美好瞬间。","曾与众多品牌合作，作品涵盖时尚大片、产品广告、人像摄影等多个领域。始终坚持「用光影讲述故事，用镜头传递情感」的创作理念，将商业需求与艺术表达完美融合，为每一位客户呈现独特而深刻的视觉体验。"],
-  email: '1281956497@qq.com',
-  instagram: '@glax141',
+  email: 'contact@glax.com',
+  instagram: '@glax.photo',
   wechat: 'glax141',
 };
 
@@ -268,9 +268,6 @@ export const PROJECTS: Project[] = [
     "descriptionEn": "Creative fashion editorial works, breaking conventional boundaries.",
     "cover": "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773813851835.jpg",
     "images": [
-      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773805973467.jpg",
-      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773805075713.jpg",
-      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773804942815.jpg",
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739728313_ywk7d.jpg",
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739710702_94f8b.jpg",
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739700611_y2s35.jpg",
