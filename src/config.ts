@@ -266,7 +266,7 @@ export const PROJECTS: Project[] = [
     "titleEn": "Fashion Editorial",
     "description": "创意时尚杂志作品，打破常规边界。这个系列是与顶级时尚杂志的合作成果，探索先锋设计与传统美学的碰撞融合。每一次拍摄都是一场视觉革命。",
     "descriptionEn": "Creative fashion editorial works, breaking conventional boundaries.",
-    "cover": "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773805075713.jpg",
+    "cover": "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773804942815.jpg",
     "images": [
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773737677447_jivvf.jpg",
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739058231_mvb4r.jpg",
@@ -332,7 +332,8 @@ export const PROJECTS: Project[] = [
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739700611_y2s35.jpg",
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739710702_94f8b.jpg",
       "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739728313_ywk7d.jpg",
-      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773804942815.jpg"
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773804942815.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/inside-cover-1773805075713.jpg"
     ]
   }
 ];
