@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   HOME_CONFIG,
   ABOUT_CONFIG,
@@ -956,8 +956,19 @@ export default function App() {
     });
   }, []);
 
-  // 轮播图数据优化：只加载前 8 张
-  const carouselImages = siteData.projects[0]?.images.slice(0, 8) || [];
+  // 精选作品：优先展示 inside 项目，其次补足其他项目
+  const carouselImages = useMemo(() => {
+    const insideProject = siteData.projects.find((p) => p.id === 'inside');
+    const fallbackProjects = siteData.projects.filter((p) => p.id !== 'inside');
+
+    const insideImages = insideProject?.images || [];
+    if (insideImages.length >= 8) return insideImages.slice(0, 8);
+
+    const fallbackImages = fallbackProjects.flatMap((p) => p.images || []);
+    return [...insideImages, ...fallbackImages].slice(0, 8);
+  }, [siteData.projects]);
+
+  const mobileCarouselImages = carouselImages.slice(0, 6);
   const extendedCarouselImages = [...carouselImages, ...carouselImages.slice(0, 3)];
 
   useEffect(() => {
@@ -998,6 +1009,20 @@ export default function App() {
         projectDetailPage * PROJECT_DETAIL_ITEMS_PER_PAGE
       )
     : [];
+  const nextProjectDetailImages = selectedProject
+    ? selectedProject.images.slice(
+        projectDetailPage * PROJECT_DETAIL_ITEMS_PER_PAGE,
+        (projectDetailPage + 1) * PROJECT_DETAIL_ITEMS_PER_PAGE
+      )
+    : [];
+
+  useEffect(() => {
+    nextProjectDetailImages.slice(0, 4).forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      img.decoding = 'async';
+    });
+  }, [nextProjectDetailImages]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-neutral-900 to-black text-white">
@@ -1072,6 +1097,7 @@ export default function App() {
                 className="w-full h-full object-cover opacity-60"
                 loading="eager"
                 fetchPriority="high"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black" />
             </div>
@@ -1097,20 +1123,44 @@ export default function App() {
                 <span className="block text-sm text-neutral-500 mt-2">Selected Works</span>
               </h2>
             </div>
+
+            {/* 手机端：同屏多张小图 */}
+            <div className="md:hidden px-4">
+              <div className="grid grid-cols-3 gap-2">
+                {mobileCarouselImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="block"
+                    onClick={() => setSelectedImage(img)}
+                  >
+                    <img
+                      src={img}
+                      alt=""
+                      className="w-full aspect-[3/4] object-cover rounded-lg hover:opacity-80 transition-opacity"
+                      loading={idx < 2 ? 'eager' : 'lazy'}
+                      fetchPriority={idx < 2 ? 'high' : 'low'}
+                      decoding="async"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
             
-            <div className="relative">
+            {/* 桌面端：横向滚动展示 */}
+            <div className="relative hidden md:block">
               <div
                 className="flex transition-transform duration-700 ease-in-out"
-                style={{ transform: `translateX(-${carouselOffset * (100 / 4)}%)` }}
+                style={{ transform: `translateX(-${carouselOffset * 25}%)` }}
               >
                 {extendedCarouselImages.map((img, idx) => (
-                  <div key={idx} className="w-full md:w-1/2 lg:w-1/4 flex-shrink-0 px-2">
+                  <div key={idx} className="w-1/2 lg:w-1/4 flex-shrink-0 px-2">
                     <img
                       src={img}
                       alt=""
                       className="w-full aspect-[3/4] object-cover rounded hover:opacity-80 transition-opacity cursor-pointer"
-                      loading={idx < 4 ? "eager" : "lazy"}
-                      fetchPriority={idx < 4 ? "high" : "low"}
+                      loading={idx < 2 ? "eager" : "lazy"}
+                      fetchPriority={idx < 2 ? "high" : "low"}
                       decoding="async"
                       onClick={() => setSelectedImage(img)}
                     />
@@ -1143,8 +1193,8 @@ export default function App() {
                       src={project.cover}
                       alt={project.title}
                       className="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading={idx < 3 ? "eager" : "lazy"}
-                      fetchPriority={idx < 3 ? "high" : "low"}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      fetchPriority={idx === 0 ? "high" : "low"}
                       decoding="async"
                     />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -1174,15 +1224,15 @@ export default function App() {
             <h2 className="text-3xl font-light mb-2">{selectedProject.title}</h2>
             <p className="text-neutral-400 mb-8">{selectedProject.description}</p>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {projectDetailImages.map((img, idx) => (
                 <img
                   key={`${projectDetailPage}-${idx}`}
                   src={img}
                   alt=""
                   className="w-full aspect-square object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
-                  loading={idx < 4 ? "eager" : "lazy"}
-                  fetchPriority={idx < 4 ? "high" : "low"}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  fetchPriority={idx === 0 ? "high" : "low"}
                   decoding="async"
                   onClick={() => setSelectedImage(img)}
                 />
