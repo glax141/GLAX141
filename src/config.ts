@@ -1,135 +1,7 @@
-/**
- * ============================================
- * GLAX 摄影作品集 - 唯一配置文件
- * ============================================
- * 
- * 📌 所有网站内容都在这个文件中配置
- * 📌 修改后推送到 GitHub，网站会自动更新
- * 
- * 🖼️ 图片链接推荐方式：
- *   方式1: 上传到 GitHub 仓库，使用 jsDelivr CDN
- *          https://cdn.jsdelivr.net/gh/用户名/仓库名@main/路径/图片.jpg
- *   方式2: 使用免费图床 (imgbb, cloudinary 等)
- *   方式3: 使用 Unsplash 等免费图片链接
- */
+import type { Project } from './config';
 
 // ============================================
-// 🏠 首页设置
-// ============================================
-export const HOME_CONFIG = {
-  // 主页全屏背景大图
-  heroImage: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1920&h=1080&fit=crop',
-};
-
-// ============================================
-// 👤 关于我
-// ============================================
-export const ABOUT_CONFIG = {
-  name: 'GLAX',
-  title: '商业 / 时尚摄影师',
-  titleEn: 'Commercial & Fashion Photographer',
-  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop',
-  bio: [
-    'GLAX，商业与时尚领域的资深摄影师，拥有超过 10 年的影像创作经验。',
-    '我的镜头语言追求极致与纯粹，在光影的交织中捕捉瞬间的永恒。相信每一帧画面都是情感与故事的载体，用专业视角诠释商业价值，用艺术眼光定格美好瞬间。',
-    '曾与众多国际品牌合作，作品涵盖时尚大片、产品广告、人像摄影等多个领域。始终坚持「用光影讲述故事，用镜头传递情感」的创作理念，将商业需求与艺术表达完美融合，为每一位客户呈现独特而深刻的视觉体验。',
-  ],
-  email: 'glax@example.com',
-  instagram: '@glax_photo',
-  wechat: 'GLAX141',
-};
-
-// ============================================
-// 🖼️ 项目配置
-// ============================================
-export interface Project {
-  id: string;
-  title: string;
-  titleEn: string;
-  description: string;
-  descriptionEn: string;
-  cover: string;       // 封面图
-  images: string[];    // 全部作品图片
-}
-
-export const PROJECTS: Project[] = [
-  {
-    id: 'lookbook',
-    title: 'LOOKBOOK',
-    titleEn: 'Portrait & Fashion',
-    description: '纯粹人像与服装摄影，捕捉时尚的本质与灵魂。在这个系列中，我探索人与服装之间的关系，用镜头讲述每一个穿着背后的故事。光线、构图、情绪——一切都在瞬间定格。',
-    descriptionEn: 'Pure portrait and fashion photography, capturing the essence and soul of style.',
-    cover: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&h=1000&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1502716119720-b23a1e3b2b22?w=1200&h=800&fit=crop',
-    ],
-  },
-  {
-    id: 'still',
-    title: '静谧',
-    titleEn: 'Still Life',
-    description: '静物摄影，专注于产品之美。在这个系列中，每一件物品都被赋予生命——精致的鞋子、优雅的服装、闪耀的首饰。我追求的是让观者感受到物品的温度与质感。',
-    descriptionEn: 'Still life photography, focusing on the beauty of products — shoes, clothing, jewelry.',
-    cover: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=1000&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=1200&h=800&fit=crop',
-    ],
-  },
-  {
-    id: 'inside',
-    title: 'inside',
-    titleEn: 'Fashion Editorial',
-    description: '创意时尚杂志作品，打破常规边界。这个系列是与顶级时尚杂志的合作成果，探索先锋设计与传统美学的碰撞融合。每一次拍摄都是一场视觉革命。',
-    descriptionEn: 'Creative fashion editorial works, breaking conventional boundaries.',
-    cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=1000&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1504703395950-b89145a5425b?w=1200&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&h=800&fit=crop',
-    ],
-  },
-];
-
-// ============================================
-// 📊 统计数据
-// ============================================
-export const STATS = [
-  { value: '10+', label: '年经验', labelEn: 'Years' },
-  { value: '200+', label: '合作客户', labelEn: 'Clients' },
-  { value: '500+', label: '作品数量', labelEn: 'Works' },
-];
-
-// ============================================
-// 🔑 后台密码（SHA-256 加密存储，不显示明文）
-// ============================================
-// 如需修改密码，请在浏览器控制台运行以下命令获取新密码的哈希值：
-// crypto.subtle.digest('SHA-256', new TextEncoder().encode('你的新密码')).then(b => console.log(Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2,'0')).join('')))
-// 然后将下方哈希值替换即可
-export const ADMIN_PASSWORD_HASH = 'a31e84082e81e1499d0ab37bb2a9e612f97b646a6881e0b6e3563e181e3e87f6';
-
-// ============================================
-// 📦 GitHub 仓库配置（用于直接上传图片和更新配置）
+// GitHub 配置
 // ============================================
 export const GITHUB_CONFIG = {
   username: 'glax141',
@@ -138,10 +10,338 @@ export const GITHUB_CONFIG = {
 };
 
 // ============================================
-// ☁️ GitHub Gist 云同步配置（保留，备用）
+// 后台密码哈希（SHA-256）
+// ============================================
+export const ADMIN_PASSWORD_HASH = 'a31e84082e81e1499d0ab37bb2a9e612f97b646a6881e0b6e3563e181e3e87f6';
+
+// ============================================
+// Gist 配置（保留，但不使用）
 // ============================================
 export const GIST_CONFIG = {
-  // Gist ID 会在首次同步时自动生成并保存到 localStorage
-  // Token 需要在后台管理面板中配置（保存在 localStorage，不会提交到代码）
-  enabled: true,
+  gistId: '',
 };
+
+// ============================================
+// 首页配置
+// ============================================
+export const HOME_CONFIG = {
+  heroImage: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/hero/1773737900844_g53ef.jpg',
+};
+
+// ============================================
+// 关于我配置
+// ============================================
+export const ABOUT_CONFIG = {
+  name: 'GLAX',
+  title: '商业 / 时尚摄影师',
+  avatar: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/avatar/1773738288058_j8ehc.jpg',
+  bio: ["GLAX，商业与时尚领域的资深摄影师，拥有超过5年的影像创作经验。","我的镜头语言追求极致与纯粹，在光影的交织中捕捉瞬间的永恒。相信每一帧画面都是情感与故事的载体，用专业视角诠释商业价值，用艺术眼光定格美好瞬间。","曾与众多品牌合作，作品涵盖时尚大片、产品广告、人像摄影等多个领域。始终坚持「用光影讲述故事，用镜头传递情感」的创作理念，将商业需求与艺术表达完美融合，为每一位客户呈现独特而深刻的视觉体验。"],
+  email: 'contact@glax.com',
+  instagram: '@glax.photo',
+  wechat: 'glax141',
+};
+
+// ============================================
+// 项目配置
+// ============================================
+export const PROJECTS: Project[] = [
+  {
+    "id": "lookbook",
+    "title": "LOOKBOOK",
+    "titleEn": "Portrait & Fashion",
+    "description": "纯粹人像与服装摄影，捕捉时尚的本质与灵魂。在这个系列中，我探索人与服装之间的关系，用镜头讲述每一个穿着背后的故事。光线、构图、情绪——一切都在瞬间定格。",
+    "descriptionEn": "Pure portrait and fashion photography, capturing the essence and soul of style.",
+    "cover": "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773737640537_ymxuh.jpg",
+    "images": [
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773737640537_ymxuh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738009566_ro49x.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738016425_29d0o.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738023245_ia4c4.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738029190_ht15e.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738037063_qk5xh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738046163_2s0je.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738052673_ryalm.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738058334_io5y5.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738061474_ox8zr.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738065970_txzp0.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773738074360_bv79b.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740249615_cu5d0.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740264074_zucx2.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740276956_fgxdi.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740285427_1r8yq.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740291487_cpbqq.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740301466_skl0s.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740308104_jpv2z.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740317860_tqato.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740321217_g1ca7.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740334826_4i22k.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740343041_5gr8g.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740346651_ixaj5.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740355827_6a9t6.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740360830_kpdvd.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740369928_4ct1k.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740375408_l02sf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740383340_udkf6.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740390555_to5tn.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740398513_eacnq.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740406176_movdf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740417952_n34t2.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740423607_yr34k.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740430387_secnq.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740436471_it1mf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740447620_sicuf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740458751_iwey4.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740464196_ckv0a.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740475447_7v4ay.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740482668_u5e2j.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740490862_nvxtz.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740499015_ujz0o.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740504759_n8c8l.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740511866_akvhm.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740521465_3xuon.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740528323_xv3gm.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740534742_dwk7w.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740543407_576ht.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740555451_z4ocm.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740565791_imcv4.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740576539_c9npu.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740586553_s7hc5.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740594087_vw8zq.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740606655_4ac6e.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740614973_uyxv9.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740625901_jyf64.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740636169_3p1jc.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740648697_wsl5y.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740654168_24rgc.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740662100_tfer2.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740667255_1oymr.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740678915_2ze7e.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740683680_yqhkf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740690210_3itwj.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740694973_syipn.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740702389_wi46x.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740715839_ujpsj.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740723751_6v2ll.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740734350_lk5gh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740748367_uk3p0.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740758140_e4hmi.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740769039_5lzhk.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740777726_n9bcs.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740793401_lqs9a.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740800830_ty4ua.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740815937_80x8x.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740827234_fgerj.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740832591_a77bk.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740842286_n8ozr.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740856290_gn85p.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740867392_3tkat.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740878810_r31zf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740887914_7m6rh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740895774_tzm2i.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740903502_1jo4v.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740913745_y2qzf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740923910_a2ahh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740926790_ffil0.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740931895_auno9.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740945650_nfk1e.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740954861_1ld3t.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740962997_k1edb.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740975712_88psn.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740987519_7na0q.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773740995053_xwm3s.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741002862_lbo5y.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741013178_5jbig.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741029319_j90z0.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741037331_0p6vh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741045322_nh6jm.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741053611_5ekmp.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741066850_n9en3.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741076287_k85ay.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741084360_tkgp0.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741091901_gtjkl.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741099588_o7yey.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741106450_i0jh2.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741115701_s3lp3.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741123829_0u557.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741134071_7o5lg.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741144916_f3u2z.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741156226_xjust.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741171278_jtg58.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741182002_77efr.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741188762_1uobq.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741195693_aiq8h.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741200868_7so92.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741210145_0lxkq.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741216791_fyau5.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741227988_oy87p.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741238851_lb0b1.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741247253_m2si3.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741252757_wt7mz.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741264466_aonxh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741271655_x6xuz.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741277981_86bcj.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741284198_mibix.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741291854_h1l3j.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741298649_1e2gq.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741305996_3dnd4.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741319731_idknj.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741326936_rkfye.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741331912_drfrd.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741342569_bdvc2.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741353217_tavyj.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741357891_3ivkd.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741366292_ku8sf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741372007_our42.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741376794_0obcx.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741382296_yltao.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741385152_yygux.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741403369_4vp2l.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741418260_tircx.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/lookbook/1773741423923_tgauw.jpg"
+    ]
+  },
+  {
+    "id": "still",
+    "title": "静谧",
+    "titleEn": "Still Life",
+    "description": "静物摄影，专注于产品之美。在这个系列中，每一件物品都被赋予生命——精致的鞋子、优雅的服装、闪耀的首饰。我追求的是让观者感受到物品的温度与质感。",
+    "descriptionEn": "Still life photography, focusing on the beauty of products — shoes, clothing, jewelry.",
+    "cover": "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738033352_m5rx0.jpg",
+    "images": [
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738033352_m5rx0.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738377248_l0o58.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738383191_q4y12.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738396769_oybfe.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738405540_6e81k.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738407863_4agrd.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738419162_i9ixg.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738429260_v7w2b.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738435329_xxuih.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738441272_0oyau.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738451773_uob9f.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738461982_w6gmc.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738470451_j64wh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738481353_pwthw.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738491466_ttbi9.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738500653_yqh5x.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738506551_gc65a.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738517297_b74v3.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738524138_rwxe4.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738537563_qgxb9.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738540909_fe30t.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738546584_eda6g.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738550084_e1d4s.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738555600_f5soh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738557604_zj7gv.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738562091_mlrjo.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738568081_oe0gs.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738572243_st6lf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738586094_r9x2o.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738595829_svhoh.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738606021_maz8u.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738617960_vvqwx.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738633933_gdt23.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738638777_06x01.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738642987_ngff4.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738648291_7xxao.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738656723_tfddk.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738664752_48hn6.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738677087_4yj92.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738687701_soudl.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738694575_zazhg.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738699507_o44r9.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738704903_h6b9r.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738712898_cvsr2.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738720702_tve2j.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738730383_t2549.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738738379_ecujr.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738747725_v6ick.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738758582_t8s3y.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/still/1773738764326_4cn4j.jpg"
+    ]
+  },
+  {
+    "id": "inside",
+    "title": "inside",
+    "titleEn": "Fashion Editorial",
+    "description": "创意时尚杂志作品，打破常规边界。这个系列是与顶级时尚杂志的合作成果，探索先锋设计与传统美学的碰撞融合。每一次拍摄都是一场视觉革命。",
+    "descriptionEn": "Creative fashion editorial works, breaking conventional boundaries.",
+    "cover": "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773737677447_jivvf.jpg",
+    "images": [
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773737677447_jivvf.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739058231_mvb4r.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739068552_tq1tn.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739080122_glljz.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739089681_5mez5.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739103680_86boj.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739116122_0pgct.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739116865_mnpuz.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739130657_wnm8y.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739138628_tvbhc.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739149787_sn4be.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739159421_6jnzb.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739203520_gty53.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739217010_4xwna.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739220918_ittfy.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739226223_jchtn.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739234784_y05f7.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739243315_rppwg.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739253706_6c6ek.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739268965_95g0j.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739279303_m79ih.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739285782_mu7f3.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739295314_lr51t.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739303876_qn62u.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739316857_fhmij.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739325888_5p39b.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739338025_ax86e.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739354101_7o7q4.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739363834_42utu.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739370207_foa74.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739375535_lbcyj.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739386616_uglc8.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739395791_fyi8s.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739404723_61sv3.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739422193_afr5y.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739440778_u2s00.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739453382_ap5bx.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739458492_5nbpk.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739472728_2pvup.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739479986_oq48y.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739489003_q2m9x.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739498522_1tgi3.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739513036_i6goo.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739520975_ja06e.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739528446_16kgm.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739537811_lv3q3.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739545958_vlkvk.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739557545_t7n3i.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739568287_ovd6j.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739578306_01tev.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739589846_x54yx.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739600024_jp4tm.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739606464_2g6x7.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739617847_2jkuz.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739634598_js7y6.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739639954_3xmbb.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739645698_24sax.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739657363_srcwu.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739669590_j1s6e.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739678104_tdvlc.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739687336_u1saz.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739700611_y2s35.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739710702_94f8b.jpg",
+      "https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images/inside/1773739728313_ywk7d.jpg"
+    ]
+  }
+];
+
+// ============================================
+// 数据统计
+// ============================================
+export const STATS = [
+  { label: '年经验', value: '10+', labelEn: 'Years Experience' },
+  { label: '完成项目', value: '200+', labelEn: 'Projects Completed' },
+  { label: '国际奖项', value: '15+', labelEn: 'International Awards' },
+  { label: '满意客户', value: '100%', labelEn: 'Satisfied Clients' },
+];
