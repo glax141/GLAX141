@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { HOME_CONFIG, ABOUT_CONFIG, PROJECTS, STATS, ADMIN_PASSWORD_HASH, Project } from './config';
-import LazyImage from './components/LazyImage';
-import { getThumbUrl, compressImage as compressImageFile } from './utils/imageOptimizer';
 
 // ============================================
 // 工具函数
@@ -13,10 +11,22 @@ async function hashPassword(password: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// 兼容旧调用的 compressImage 包装函数
-async function compressImage(file: File, maxWidth = 1920, quality = 0.85): Promise<string> {
-  const result = await compressImageFile(file, { maxWidth, maxHeight: maxWidth, quality });
-  return result.dataUrl;
+function compressImage(file: File, maxWidth = 1920, quality = 0.85): Promise<string> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxWidth) { height = (height * maxWidth) / width; width = maxWidth; }
+      canvas.width = width; canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = url;
+  });
 }
 
 // ============================================
@@ -59,7 +69,7 @@ export default function App() {
   const [configFileContent, setConfigFileContent] = useState('');
   const [showConfigPreview, setShowConfigPreview] = useState(false);
 
-  const ITEMS_PER_PAGE = 12; // 每页12张
+  const ITEMS_PER_PAGE = 10;
   const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const btnRef = useRef<HTMLButtonElement>(null);
 
@@ -101,27 +111,6 @@ export default function App() {
     }, 3000);
     return () => clearInterval(timer);
   }, [data.projects]);
-
-  // 灯箱键盘导航
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!lightboxImg) return;
-      const images = selectedProject?.images || data.projects[0]?.images || [];
-      if (e.key === 'ArrowRight') {
-        const newIdx = (lightboxIndex + 1) % images.length;
-        setLightboxIndex(newIdx);
-        setLightboxImg(images[newIdx]);
-      } else if (e.key === 'ArrowLeft') {
-        const newIdx = (lightboxIndex - 1 + images.length) % images.length;
-        setLightboxIndex(newIdx);
-        setLightboxImg(images[newIdx]);
-      } else if (e.key === 'Escape') {
-        setLightboxImg(null);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lightboxImg, lightboxIndex, selectedProject, data.projects]);
 
   // 磁吸按钮效果
   useEffect(() => {
@@ -184,7 +173,7 @@ export default function App() {
   ): Promise<string | null> => {
     const { token, username, repo, branch } = githubConfig;
     if (!token || !username || !repo) {
-      setUploadStatus(prev => ({ ...prev, [statusKey]: '❌ 请先在「GitHub配置」标签填写 Token（需要 repo 权限）' }));
+      setUploadStatus(prev => ({ ...prev, [statusKey]: '❌ 请先填写 GitHub 配置' }));
       return null;
     }
 
@@ -199,7 +188,7 @@ export default function App() {
     const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
     const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/public/images/${fileName}`;
 
-    setUploadStatus(prev => ({ ...prev, [statusKey]: '⬆️ 上传到GitHub中...' }));
+    setUploadStatus(prev => ({ ...prev, [statusKey]: '⬆️ 上传中...' }));
 
     try {
       const res = await fetch(apiUrl, {
@@ -217,80 +206,23 @@ export default function App() {
 
       if (!res.ok) {
         const err = await res.json();
-        let errMsg = err.message || '未知错误';
-        if (errMsg.includes('Bad credentials')) errMsg = 'Token无效，请重新生成（需要勾选repo权限）';
-        if (errMsg.includes('Not Found')) errMsg = '仓库不存在，请检查用户名和仓库名';
-        if (errMsg.includes('403')) errMsg = 'Token权限不足，需要勾选repo权限（不是gist权限）';
-        setUploadStatus(prev => ({ ...prev, [statusKey]: `❌ ${errMsg}` }));
+        setUploadStatus(prev => ({ ...prev, [statusKey]: `❌ 上传失败: ${err.message}` }));
         return null;
       }
 
       // 生成 jsDelivr CDN 链接
       const cdnUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/public/images/${fileName}`;
-      setUploadStatus(prev => ({ ...prev, [statusKey]: `✅ 上传成功！正在自动发布...` }));
+      setUploadStatus(prev => ({ ...prev, [statusKey]: `✅ 上传成功！` }));
       return cdnUrl;
     } catch (e) {
-      setUploadStatus(prev => ({ ...prev, [statusKey]: `❌ 网络错误，请检查Token和网络` }));
+      setUploadStatus(prev => ({ ...prev, [statusKey]: `❌ 网络错误，请检查 Token` }));
       return null;
-    }
-  };
-
-  // ============================================
-  // 上传图片后自动推送 config.ts
-  // ============================================
-  const autoPublishAfterUpload = async (newEditData: typeof editData) => {
-    const { token, username, repo } = githubConfig;
-    if (!token || !username || !repo) return; // 没有Token就跳过自动发布
-
-    setSaveStatus('🔄 自动发布中，请稍候...');
-    const content = generateConfigContentFromData(newEditData);
-    const base64Content = btoa(unescape(encodeURIComponent(content)));
-
-    try {
-      const getRes = await fetch(
-        `https://api.github.com/repos/${username}/${repo}/contents/src/config.ts`,
-        { headers: { 'Authorization': `token ${token}` } }
-      );
-      let sha = '';
-      if (getRes.ok) { const d = await getRes.json(); sha = d.sha; }
-
-      const updateRes = await fetch(
-        `https://api.github.com/repos/${username}/${repo}/contents/src/config.ts`,
-        {
-          method: 'PUT',
-          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: `✨ 自动更新图片 - ${new Date().toLocaleString('zh-CN')}`,
-            content: base64Content,
-            sha,
-            branch: githubConfig.branch,
-          }),
-        }
-      );
-
-      if (updateRes.ok) {
-        localStorage.setItem('glax_data_v3', JSON.stringify(newEditData));
-        setData(JSON.parse(JSON.stringify(newEditData)));
-        setHasChanges(false);
-        setSaveStatus('✅ 图片已自动发布！约2-3分钟后所有设备可见（GitHub正在构建）');
-        setTimeout(() => setSaveStatus(''), 10000);
-      } else {
-        setSaveStatus('⚠️ 图片已上传到GitHub，但config.ts更新失败，请手动点击「发布」');
-      }
-    } catch {
-      setSaveStatus('⚠️ 图片已上传，但自动发布失败，请手动点击「发布」');
     }
   };
 
   // ============================================
   // 生成 config.ts 文件内容
   // ============================================
-  const generateConfigContentFromData = (e: typeof editData) => {
-    const projectsStr = e.projects.map(p => `  {\n    id: '${p.id}',\n    title: '${p.title}',\n    titleEn: '${p.titleEn}',\n    description: '${p.description.replace(/'/g, "\\'")}',\n    descriptionEn: '${p.descriptionEn.replace(/'/g, "\\'")}',\n    cover: '${p.cover}',\n    images: [\n${p.images.map(img => `      '${img}',`).join('\n')}\n    ],\n  }`).join(',\n');
-
-    return `/**\n * GLAX 摄影作品集 - 配置文件\n * 最后更新: ${new Date().toLocaleString('zh-CN')}\n */\n\nexport const HOME_CONFIG = {\n  heroImage: '${e.heroImage}',\n};\n\nexport const ABOUT_CONFIG = {\n  name: '${e.about.name}',\n  title: '${e.about.title}',\n  titleEn: '${e.about.titleEn}',\n  avatar: '${e.about.avatar}',\n  bio: \`${e.about.bio}\`,\n  email: '${e.about.email}',\n  instagram: '${e.about.instagram}',\n  wechat: '${e.about.wechat}',\n};\n\nexport interface Project {\n  id: string;\n  title: string;\n  titleEn: string;\n  description: string;\n  descriptionEn: string;\n  cover: string;\n  images: string[];\n}\n\nexport const PROJECTS: Project[] = [\n${projectsStr}\n];\n\nexport const STATS = [\n  { value: '10+', label: '年经验', labelEn: 'Years' },\n  { value: '200+', label: '合作客户', labelEn: 'Clients' },\n  { value: '500+', label: '作品数量', labelEn: 'Works' },\n];\n\nexport const ADMIN_PASSWORD_HASH = '${ADMIN_PASSWORD_HASH}';\n\nexport const GIST_CONFIG = {\n  publicGistId: '',\n  enabled: false,\n};\n`;
-  };
-
   const generateConfigContent = () => {
     const e = editData;
     const projectsStr = e.projects.map(p => `  {
@@ -447,26 +379,22 @@ export const GIST_CONFIG = {
       return;
     }
 
-    // 有 GitHub Token 时，上传到 GitHub，完成后自动发布
-    let latestData = editData;
+    // 有 GitHub Token 时，上传到 GitHub
     for (const file of Array.from(files)) {
       const statusKey = `${projectId}_${type}_${Date.now()}`;
       const cdnUrl = await uploadImageToGithub(file, projectId, statusKey);
       if (cdnUrl) {
-        latestData = {
-          ...latestData,
-          projects: latestData.projects.map(p => {
+        setEditData(prev => {
+          const newProjects = prev.projects.map(p => {
             if (p.id !== projectId) return p;
             if (type === 'cover') return { ...p, cover: cdnUrl };
             return { ...p, images: [...p.images, cdnUrl] };
-          }),
-        };
-        setEditData(latestData);
+          });
+          return { ...prev, projects: newProjects };
+        });
         markChanged();
       }
     }
-    // 上传完成后自动推送 config.ts
-    await autoPublishAfterUpload(latestData);
   };
 
   const handleHeroUpload = async (files: FileList | null) => {
@@ -481,10 +409,8 @@ export const GIST_CONFIG = {
     }
     const cdnUrl = await uploadImageToGithub(file, 'hero', 'hero');
     if (cdnUrl) {
-      const newData = { ...editData, heroImage: cdnUrl };
-      setEditData(newData);
+      setEditData(prev => ({ ...prev, heroImage: cdnUrl }));
       markChanged();
-      await autoPublishAfterUpload(newData);
     }
   };
 
@@ -500,10 +426,8 @@ export const GIST_CONFIG = {
     }
     const cdnUrl = await uploadImageToGithub(file, 'avatar', 'avatar');
     if (cdnUrl) {
-      const newData = { ...editData, about: { ...editData.about, avatar: cdnUrl } };
-      setEditData(newData);
+      setEditData(prev => ({ ...prev, about: { ...prev.about, avatar: cdnUrl } }));
       markChanged();
-      await autoPublishAfterUpload(newData);
     }
   };
 
@@ -625,15 +549,11 @@ export const GIST_CONFIG = {
                 {[...carouselImages, ...carouselImages, ...carouselImages].map((img, i) => (
                   <div
                     key={i}
-                    className="flex-shrink-0 w-52 h-72 rounded-lg overflow-hidden cursor-pointer group relative bg-zinc-900"
+                    className="flex-shrink-0 w-52 h-72 rounded-lg overflow-hidden cursor-pointer group relative"
                     onClick={() => { setLightboxImg(img); setLightboxIndex(i % carouselImages.length); }}
                   >
-                    <LazyImage
-                      src={img}
-                      thumbSrc={getThumbUrl(img, 50)}
-                      className="w-full h-full transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 pointer-events-none" />
+                    <img src={img} alt="" className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
                   </div>
                 ))}
               </div>
@@ -656,7 +576,7 @@ export const GIST_CONFIG = {
                 onClick={() => { setPage('portfolio'); setSelectedProject(p); setProjectPage(1); }}
                 className="group relative overflow-hidden rounded-lg aspect-[3/4] bg-zinc-900"
               >
-                <LazyImage src={p.cover} thumbSrc={getThumbUrl(p.cover, 50)} alt={p.title} className="w-full h-full transition-all duration-700 group-hover:scale-110 group-hover:brightness-75" />
+                <img src={p.cover} alt={p.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
                   <h4 className="text-white font-bold text-xl tracking-widest">{p.title}</h4>
@@ -692,96 +612,32 @@ export const GIST_CONFIG = {
               <p className="text-white/30 text-sm tracking-widest mb-6">{selectedProject.titleEn}</p>
               <p className="text-white/60 max-w-2xl leading-relaxed">{selectedProject.description}</p>
             </div>
-            {/* 页码信息 */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-white/30 text-xs tracking-widest">
-                  共 {images.length} 张 · 第 {projectPage}/{totalPages} 页
-                  <span className="text-white/15 ml-2">Total {images.length} · Page {projectPage}/{totalPages}</span>
-                </span>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {pageImages.map((img, i) => (
                 <div
-                  key={`page${projectPage}-${i}`}
-                  className="aspect-square rounded-lg cursor-pointer group relative bg-zinc-900 overflow-hidden"
+                  key={i}
+                  className="aspect-square overflow-hidden rounded-lg cursor-pointer group relative bg-zinc-900"
                   onClick={() => { setLightboxImg(img); setLightboxIndex((projectPage - 1) * ITEMS_PER_PAGE + i); }}
                 >
-                  <LazyImage
-                    src={img}
-                    thumbSrc={getThumbUrl(img, 50)}
-                    className="w-full h-full transition-all duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                    <span className="text-white/0 group-hover:text-white/80 text-3xl transition-all duration-300">+</span>
-                  </div>
-                  <div className="absolute bottom-1 right-1 bg-black/50 text-white/40 text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    {(projectPage - 1) * ITEMS_PER_PAGE + i + 1}
+                  <img src={img} alt="" className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                    <span className="text-white/0 group-hover:text-white/80 text-2xl transition-all duration-300">⊕</span>
                   </div>
                 </div>
               ))}
             </div>
-
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-3 mt-10 flex-wrap">
-                {/* 首页按钮 */}
-                <button
-                  onClick={() => { setProjectPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  disabled={projectPage === 1}
-                  className="px-3 py-2 border border-white/20 text-white/40 hover:text-white hover:border-white/60 disabled:opacity-20 disabled:cursor-not-allowed transition-all text-xs rounded"
-                >
-                  首页
-                </button>
-                <button
-                  onClick={() => { setProjectPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  disabled={projectPage === 1}
-                  className="px-5 py-2 border border-white/20 text-white/60 hover:text-white hover:border-white/60 disabled:opacity-20 disabled:cursor-not-allowed transition-all text-sm tracking-widest rounded"
-                >
+              <div className="flex items-center justify-center gap-4 mt-12">
+                <button onClick={() => setProjectPage(p => Math.max(1, p - 1))} disabled={projectPage === 1}
+                  className="px-6 py-2 border border-white/20 text-white/60 hover:text-white hover:border-white/60 disabled:opacity-20 disabled:cursor-not-allowed transition-all text-sm tracking-widest rounded">
                   ← 上一页
                 </button>
-                {/* 页码按钮 */}
-                <div className="flex gap-1">
-                  {Array.from({ length: Math.min(totalPages, 7) }, (_, idx) => {
-                    let pageNum: number;
-                    if (totalPages <= 7) {
-                      pageNum = idx + 1;
-                    } else if (projectPage <= 4) {
-                      pageNum = idx < 5 ? idx + 1 : idx === 5 ? -1 : totalPages;
-                    } else if (projectPage >= totalPages - 3) {
-                      pageNum = idx === 0 ? 1 : idx === 1 ? -1 : totalPages - (6 - idx);
-                    } else {
-                      const map = [1, -1, projectPage - 1, projectPage, projectPage + 1, -2, totalPages];
-                      pageNum = map[idx];
-                    }
-                    if (pageNum < 0) return (
-                      <span key={idx} className="w-9 h-9 flex items-center justify-center text-white/20 text-sm">···</span>
-                    );
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => { setProjectPage(pageNum); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                        className={`w-9 h-9 rounded text-sm transition-all ${pageNum === projectPage ? 'bg-white text-black font-bold' : 'border border-white/20 text-white/40 hover:text-white hover:border-white/60'}`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                </div>
-                <button
-                  onClick={() => { setProjectPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  disabled={projectPage === totalPages}
-                  className="px-5 py-2 border border-white/20 text-white/60 hover:text-white hover:border-white/60 disabled:opacity-20 disabled:cursor-not-allowed transition-all text-sm tracking-widest rounded"
-                >
+                <span className="text-white/40 text-sm">
+                  <span className="text-white">{projectPage}</span> / {totalPages}
+                </span>
+                <button onClick={() => setProjectPage(p => Math.min(totalPages, p + 1))} disabled={projectPage === totalPages}
+                  className="px-6 py-2 border border-white/20 text-white/60 hover:text-white hover:border-white/60 disabled:opacity-20 disabled:cursor-not-allowed transition-all text-sm tracking-widest rounded">
                   下一页 →
-                </button>
-                <button
-                  onClick={() => { setProjectPage(totalPages); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  disabled={projectPage === totalPages}
-                  className="px-3 py-2 border border-white/20 text-white/40 hover:text-white hover:border-white/60 disabled:opacity-20 disabled:cursor-not-allowed transition-all text-xs rounded"
-                >
-                  末页
                 </button>
               </div>
             )}
@@ -805,7 +661,7 @@ export const GIST_CONFIG = {
                 onClick={() => { setSelectedProject(p); setProjectPage(1); }}
                 className={`group relative overflow-hidden rounded-lg bg-zinc-900 text-left ${i === 0 ? 'md:col-span-2 md:row-span-2 aspect-[4/3]' : 'aspect-[3/4]'}`}
               >
-                <LazyImage src={p.cover} thumbSrc={getThumbUrl(p.cover, 50)} alt={p.title} className="w-full h-full transition-all duration-700 group-hover:scale-105" />
+                <img src={p.cover} alt={p.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
                   <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
@@ -962,36 +818,23 @@ export const GIST_CONFIG = {
     <div className="fixed inset-0 bg-black/95 z-50 overflow-auto">
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
         {/* 后台顶部 */}
-        <div className="sticky top-0 bg-black/98 py-4 z-10 border-b border-white/10 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-white font-black text-2xl tracking-widest">后台管理 Admin</h2>
-              <p className="text-white/30 text-xs mt-1">内容管理系统 CMS</p>
-            </div>
+        <div className="flex items-center justify-between mb-8 sticky top-0 bg-black/95 py-4 z-10 border-b border-white/10">
+          <div>
+            <h2 className="text-white font-black text-2xl tracking-widest">后台管理 Admin</h2>
+            <p className="text-white/30 text-xs mt-1">内容管理系统 CMS</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {hasChanges && (
+              <span className="text-yellow-400 text-xs animate-pulse">● 有未保存的修改</span>
+            )}
+            {hasChanges && (
+              <button onClick={handleSaveLocal} className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded text-sm tracking-wide transition-colors">
+                💾 保存到本地
+              </button>
+            )}
             <button onClick={() => setIsAdmin(false)} className="text-white/40 hover:text-white border border-white/20 px-4 py-2 rounded text-sm transition-colors">
               退出
             </button>
-          </div>
-
-          {/* 一键发布大按钮 */}
-          <div className="flex gap-3 items-center flex-wrap">
-            <button
-              onClick={handleUpdateGithubConfig}
-              className="flex-1 md:flex-none bg-white text-black px-6 py-3 rounded-lg font-black text-sm tracking-widest hover:bg-white/90 transition-all shadow-lg shadow-white/10 flex items-center justify-center gap-2"
-            >
-              🚀 一键发布到GitHub（所有设备可见）
-            </button>
-            {hasChanges && (
-              <button onClick={handleSaveLocal} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-3 rounded-lg text-sm transition-colors border border-white/10">
-                💾 仅保存本地
-              </button>
-            )}
-            {hasChanges && (
-              <span className="text-yellow-400 text-xs animate-pulse">● 有未发布的修改</span>
-            )}
-            {!githubConfig.token && (
-              <span className="text-red-400 text-xs">⚠️ 未配置Token，请先在「GitHub配置」填写Token才能发布</span>
-            )}
           </div>
         </div>
 
@@ -1059,14 +902,7 @@ export const GIST_CONFIG = {
                 </li>
                 <li className="flex gap-3">
                   <span className="text-white/30 font-bold">4.</span>
-                  <div>
-                    <span>勾选权限：</span>
-                    <code className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded mx-1">✅ repo</code>
-                    <span className="text-white/60">（完整仓库权限）</span>
-                    <div className="mt-1 p-2 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-xs">
-                      ⚠️ 注意：必须选 <strong>repo</strong>，不是 gist！选错了图片无法上传！
-                    </div>
-                  </div>
+                  <span>勾选权限：<code className="bg-white/10 px-2 py-0.5 rounded">✅ repo</code>（需要完整仓库权限来上传图片和更新配置）</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-white/30 font-bold">5.</span>
@@ -1467,99 +1303,39 @@ export const GIST_CONFIG = {
   );
 
   // ============================================
-  // 灯箱（支持移动端滑动 + 图片预加载）
+  // 灯箱
   // ============================================
   const renderLightbox = () => {
     if (!lightboxImg) return null;
     const images = selectedProject?.images || data.projects[0]?.images || [];
-    const total = images.length;
-
-    // 预加载前后各一张
-    const preloadIdx = [(lightboxIndex + 1) % total, (lightboxIndex - 1 + total) % total];
-
-    const goNext = (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      const newIdx = (lightboxIndex + 1) % total;
-      setLightboxIndex(newIdx);
-      setLightboxImg(images[newIdx]);
-    };
-    const goPrev = (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      const newIdx = (lightboxIndex - 1 + total) % total;
-      setLightboxIndex(newIdx);
-      setLightboxImg(images[newIdx]);
-    };
-
     return (
-      <div
-        className="fixed inset-0 bg-black/97 z-[100] flex items-center justify-center"
-        onClick={() => setLightboxImg(null)}
-      >
-        {/* 关闭按钮 */}
-        <button
-          className="absolute top-4 right-4 md:top-6 md:right-6 text-white/60 hover:text-white text-3xl z-10 w-10 h-10 flex items-center justify-center"
-          onClick={() => setLightboxImg(null)}
-        >×</button>
-
-        {/* 计数器 */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/40 text-sm z-10 bg-black/50 px-3 py-1 rounded-full">
-          {lightboxIndex + 1} <span className="text-white/20">/</span> {total}
-        </div>
-
-        {/* 上一张 */}
-        {total > 1 && (
-          <button
-            className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white z-10 p-3 md:p-4 text-4xl md:text-5xl transition-colors bg-black/20 hover:bg-black/40 rounded-full"
-            onClick={goPrev}
-          >‹</button>
+      <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center" onClick={() => setLightboxImg(null)}>
+        <button className="absolute top-6 right-6 text-white/60 hover:text-white text-3xl z-10" onClick={() => setLightboxImg(null)}>×</button>
+        {images.length > 1 && (
+          <>
+            <button
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10 p-4"
+              onClick={(e) => {
+                e.stopPropagation();
+                const newIdx = (lightboxIndex - 1 + images.length) % images.length;
+                setLightboxIndex(newIdx);
+                setLightboxImg(images[newIdx]);
+              }}
+            >‹</button>
+            <button
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10 p-4"
+              onClick={(e) => {
+                e.stopPropagation();
+                const newIdx = (lightboxIndex + 1) % images.length;
+                setLightboxIndex(newIdx);
+                setLightboxImg(images[newIdx]);
+              }}
+            >›</button>
+          </>
         )}
-
-        {/* 主图片 */}
-        <div className="relative flex items-center justify-center w-full h-full px-16 md:px-24" onClick={e => e.stopPropagation()}>
-          <img
-            key={lightboxImg}
-            src={lightboxImg}
-            alt=""
-            className="max-w-full max-h-[85vh] object-contain rounded shadow-2xl"
-            style={{ animation: 'imgFadeIn 0.3s ease-out' }}
-          />
-        </div>
-
-        {/* 下一张 */}
-        {total > 1 && (
-          <button
-            className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white z-10 p-3 md:p-4 text-4xl md:text-5xl transition-colors bg-black/20 hover:bg-black/40 rounded-full"
-            onClick={goNext}
-          >›</button>
-        )}
-
-        {/* 缩略图条（移动端隐藏） */}
-        {total > 1 && total <= 20 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 hidden md:flex gap-1.5 z-10">
-            {images.map((img, i) => (
-              <button
-                key={i}
-                onClick={(e) => { e.stopPropagation(); setLightboxIndex(i); setLightboxImg(img); }}
-                className={`w-10 h-10 rounded overflow-hidden border-2 transition-all flex-shrink-0 ${i === lightboxIndex ? 'border-white opacity-100' : 'border-transparent opacity-40 hover:opacity-70'}`}
-              >
-                <img src={getThumbUrl(img, 80)} alt="" className="w-full h-full object-cover" loading="lazy" />
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* 移动端底部指示点 */}
-        {total > 1 && total <= 30 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex md:hidden gap-1 z-10">
-            {images.map((_, i) => (
-              <div key={i} className={`rounded-full transition-all ${i === lightboxIndex ? 'bg-white w-4 h-1.5' : 'bg-white/30 w-1.5 h-1.5'}`} />
-            ))}
-          </div>
-        )}
-
-        {/* 预加载下一张/上一张 */}
-        <div className="hidden">
-          {preloadIdx.map(idx => <img key={idx} src={images[idx]} alt="" />)}
+        <img src={lightboxImg} alt="" className="max-w-[90vw] max-h-[90vh] object-contain" onClick={e => e.stopPropagation()} />
+        <div className="absolute bottom-6 text-white/30 text-sm">
+          {lightboxIndex + 1} / {images.length}
         </div>
       </div>
     );
