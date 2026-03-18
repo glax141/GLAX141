@@ -9,6 +9,23 @@ import {
   type Project,
 } from './config';
 
+interface SiteData {
+  homeHeroImage: string;
+  aboutAvatar: string;
+  aboutBio: string[];
+  aboutEmail: string;
+  aboutInstagram: string;
+  aboutWechat: string;
+  projects: Project[];
+}
+
+interface GitHubContentItem {
+  name: string;
+  path: string;
+  type: 'file' | 'dir';
+  sha?: string;
+}
+
 // SHA-256 哈希函数
 async function sha256(text: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -225,6 +242,76 @@ async function updateGitHubFile(token: string, path: string, content: string, me
   return updateResponse.json();
 }
 
+async function fetchGitHubDirectory(path: string): Promise<GitHubContentItem[]> {
+  const owner = GITHUB_CONFIG.username;
+  const repo = GITHUB_CONFIG.repo;
+  const branch = GITHUB_CONFIG.branch;
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`);
+  if (!res.ok) throw new Error(`读取目录失败: ${path}`);
+  return res.json();
+}
+
+function toCdnUrl(path: string) {
+  return `https://cdn.jsdelivr.net/gh/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}@${GITHUB_CONFIG.branch}/${path}`;
+}
+
+async function loadImagesFromGitHub(): Promise<Partial<SiteData>> {
+  const restored: Partial<SiteData> = {};
+
+  try {
+    const [heroItems, avatarItems, lookbookItems, stillItems, insideItems] = await Promise.all([
+      fetchGitHubDirectory('public/images/hero').catch(() => []),
+      fetchGitHubDirectory('public/images/avatar').catch(() => []),
+      fetchGitHubDirectory('public/images/lookbook').catch(() => []),
+      fetchGitHubDirectory('public/images/still').catch(() => []),
+      fetchGitHubDirectory('public/images/inside').catch(() => []),
+    ]);
+
+    const heroFiles = heroItems.filter((item) => item.type === 'file');
+    const avatarFiles = avatarItems.filter((item) => item.type === 'file');
+    const lookbookFiles = lookbookItems.filter((item) => item.type === 'file');
+    const stillFiles = stillItems.filter((item) => item.type === 'file');
+    const insideFiles = insideItems.filter((item) => item.type === 'file');
+
+    if (heroFiles.length > 0) {
+      restored.homeHeroImage = toCdnUrl(heroFiles[heroFiles.length - 1].path);
+    }
+
+    if (avatarFiles.length > 0) {
+      restored.aboutAvatar = toCdnUrl(avatarFiles[avatarFiles.length - 1].path);
+    }
+
+    restored.projects = PROJECTS.map((project) => {
+      const baseProject = { ...project, images: [...project.images] };
+
+      if (project.id === 'lookbook' && lookbookFiles.length > 0) {
+        const sorted = [...lookbookFiles];
+        const coverFile = sorted.find((item) => item.name.toLowerCase().includes('cover')) || sorted[0];
+        const urls = sorted.map((item) => toCdnUrl(item.path));
+        return { ...baseProject, cover: toCdnUrl(coverFile.path), images: urls };
+      }
+      if (project.id === 'still' && stillFiles.length > 0) {
+        const sorted = [...stillFiles];
+        const coverFile = sorted.find((item) => item.name.toLowerCase().includes('cover')) || sorted[0];
+        const urls = sorted.map((item) => toCdnUrl(item.path));
+        return { ...baseProject, cover: toCdnUrl(coverFile.path), images: urls };
+      }
+      if (project.id === 'inside' && insideFiles.length > 0) {
+        const sorted = [...insideFiles];
+        const coverFile = sorted.find((item) => item.name.toLowerCase().includes('cover')) || sorted[0];
+        const urls = sorted.map((item) => toCdnUrl(item.path));
+        return { ...baseProject, cover: toCdnUrl(coverFile.path), images: urls };
+      }
+
+      return baseProject;
+    });
+  } catch (error) {
+    console.warn('GitHub 图片恢复失败，继续使用 config.ts 默认数据', error);
+  }
+
+  return restored;
+}
+
 // ============================================
 // 登录弹窗
 // ============================================
@@ -281,49 +368,27 @@ function LoginModal({ onClose, onLogin }: any) {
 function AdminPanel({ onClose }: any) {
   const [activeTab, setActiveTab] = useState('github');
   const [token, setToken] = useState(localStorage.getItem('github_token') || '');
-  const [username, setUsername] = useState(localStorage.getItem('github_username') || GITHUB_CONFIG.username);
-  const [repo, setRepo] = useState(localStorage.getItem('github_repo') || GITHUB_CONFIG.repo);
-  const [branch, setBranch] = useState(localStorage.getItem('github_branch') || GITHUB_CONFIG.branch);
+  const [username, setUsername] = useState(GITHUB_CONFIG.username);
+  const [repo, setRepo] = useState(GITHUB_CONFIG.repo);
+  const [branch, setBranch] = useState(GITHUB_CONFIG.branch);
   const [status, setStatus] = useState('');
-
-  // 优先从 localStorage 读取已保存的数据，没有则用 config.ts 默认值
-  const savedData = (() => {
-    try {
-      const raw = localStorage.getItem('glax_site_data');
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-  })();
-
-  const [homeHeroImage, setHomeHeroImage] = useState(savedData?.heroImage || HOME_CONFIG.heroImage);
-  const [aboutAvatar, setAboutAvatar] = useState(savedData?.avatar || ABOUT_CONFIG.avatar);
-  const [aboutBio, setAboutBio] = useState(savedData?.bio || ABOUT_CONFIG.bio.join('\n\n'));
-  const [aboutEmail, setAboutEmail] = useState(savedData?.email || ABOUT_CONFIG.email);
-  const [aboutInstagram, setAboutInstagram] = useState(savedData?.instagram || ABOUT_CONFIG.instagram);
-  const [aboutWechat, setAboutWechat] = useState(savedData?.wechat || ABOUT_CONFIG.wechat);
-  const [projects, setProjects] = useState<Project[]>(
-    savedData?.projects
-      ? savedData.projects
-      : PROJECTS.map((p: Project) => ({ ...p }))
-  );
+  const [homeHeroImage, setHomeHeroImage] = useState(HOME_CONFIG.heroImage);
+  const [aboutAvatar, setAboutAvatar] = useState(ABOUT_CONFIG.avatar);
+  const [aboutBio, setAboutBio] = useState(ABOUT_CONFIG.bio.join('\n\n'));
+  const [projects, setProjects] = useState(PROJECTS.map(p => ({ ...p, images: [...p.images] })));
   const [activeProjectId, setActiveProjectId] = useState(projects[0]?.id);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  // 每次数据变更自动保存到 localStorage
-  const saveToLocal = (overrides?: any) => {
-    const data = {
-      heroImage: overrides?.heroImage ?? homeHeroImage,
-      avatar: overrides?.avatar ?? aboutAvatar,
-      bio: overrides?.bio ?? aboutBio,
-      email: overrides?.email ?? aboutEmail,
-      instagram: overrides?.instagram ?? aboutInstagram,
-      wechat: overrides?.wechat ?? aboutWechat,
-      projects: overrides?.projects ?? projects,
-    };
-    localStorage.setItem('glax_site_data', JSON.stringify(data));
-  };
-
   const activeProject = projects.find(p => p.id === activeProjectId);
+
+  useEffect(() => {
+    loadImagesFromGitHub().then((restored) => {
+      if (restored.homeHeroImage) setHomeHeroImage(restored.homeHeroImage);
+      if (restored.aboutAvatar) setAboutAvatar(restored.aboutAvatar);
+      if (restored.projects) setProjects(restored.projects.map((p) => ({ ...p, images: [...p.images] })));
+    });
+  }, []);
 
   const handleSaveToken = () => {
     localStorage.setItem('github_token', token);
@@ -344,21 +409,20 @@ function AdminPanel({ onClose }: any) {
       setStatus('⏳ 上传到 GitHub...');
 
       const fileName = `${field}-${Date.now()}.jpg`;
-      const path = `public/images/${fileName}`;
+      const folder = field === 'homeHeroImage' ? 'hero' : 'avatar';
+      const path = `public/images/${folder}/${fileName}`;
 
       await updateGitHubFile(token, path, compressed.split(',')[1], `Upload ${field}`);
 
-      const imageUrl = `/images/${fileName}`;
+      const imageUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${path}`;
 
       if (field === 'homeHeroImage') {
         setHomeHeroImage(imageUrl);
-        saveToLocal({ heroImage: imageUrl });
       } else if (field === 'aboutAvatar') {
         setAboutAvatar(imageUrl);
-        saveToLocal({ avatar: imageUrl });
       }
 
-      setStatus('✅ 上传成功！图片已保存');
+      setStatus('✅ 上传成功');
       setTimeout(() => setStatus(''), 3000);
     } catch (error: any) {
       setStatus(`❌ 上传失败：${error.message}`);
@@ -372,26 +436,22 @@ function AdminPanel({ onClose }: any) {
 
     try {
       setStatus('⏳ 处理图片中...');
-      const updatedProject = { ...activeProject, images: [...activeProject.images] };
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        setStatus(`⏳ 上传第 ${i + 1}/${files.length} 张...`);
         const compressed = await compressImage(file);
-        const fileName = `${Date.now()}-${i}.jpg`;
+        const fileName = `${activeProject.id}-${Date.now()}-${i}.jpg`;
         const path = `public/images/${activeProject.id}/${fileName}`;
 
         await updateGitHubFile(token, path, compressed.split(',')[1], `Upload ${fileName}`);
 
-        const imageUrl = `/images/${activeProject.id}/${fileName}`;
-        updatedProject.images.push(imageUrl);
+        const imageUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${path}`;
+        activeProject.images.push(imageUrl);
       }
 
-      const newProjects = projects.map(p => p.id === activeProjectId ? updatedProject : p);
-      setProjects(newProjects);
-      saveToLocal({ projects: newProjects });
-      setStatus(`✅ 成功上传 ${files.length} 张图片，已自动保存`);
-      setTimeout(() => setStatus(''), 4000);
+      setProjects(projects.map(p => p.id === activeProjectId ? activeProject : p));
+      setStatus(`✅ 成功上传 ${files.length} 张图片`);
+      setTimeout(() => setStatus(''), 3000);
     } catch (error: any) {
       setStatus(`❌ 上传失败：${error.message}`);
       setTimeout(() => setStatus(''), 5000);
@@ -410,12 +470,11 @@ function AdminPanel({ onClose }: any) {
 
       await updateGitHubFile(token, path, compressed.split(',')[1], `Upload cover`);
 
-      const imageUrl = `/images/${activeProject.id}/${fileName}`;
-      const updatedProject = { ...activeProject, cover: imageUrl };
-      const newProjects = projects.map(p => p.id === activeProjectId ? updatedProject : p);
-      setProjects(newProjects);
-      saveToLocal({ projects: newProjects });
-      setStatus('✅ 封面更新成功，已自动保存');
+      const imageUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${path}`;
+      activeProject.cover = imageUrl;
+
+      setProjects(projects.map(p => p.id === activeProjectId ? activeProject : p));
+      setStatus('✅ 封面更新成功');
       setTimeout(() => setStatus(''), 3000);
     } catch (error: any) {
       setStatus(`❌ 上传失败：${error.message}`);
@@ -427,10 +486,8 @@ function AdminPanel({ onClose }: any) {
     if (!activeProject) return;
     if (!confirm('确定删除这张图片？')) return;
 
-    const updatedProject = { ...activeProject, images: activeProject.images.filter(img => img !== imageUrl) };
-    const newProjects = projects.map(p => p.id === activeProjectId ? updatedProject : p);
-    setProjects(newProjects);
-    saveToLocal({ projects: newProjects });
+    activeProject.images = activeProject.images.filter(img => img !== imageUrl);
+    setProjects(projects.map(p => p.id === activeProjectId ? activeProject : p));
     setStatus('✅ 图片已删除');
     setTimeout(() => setStatus(''), 3000);
   };
@@ -444,56 +501,68 @@ function AdminPanel({ onClose }: any) {
     try {
       setStatus('⏳ 正在更新配置文件...');
 
-      // 同时保存到 localStorage，确保立即生效
-      saveToLocal({});
+      const configContent = `import type { Project } from './config';
 
-      const configContent = `export interface Project {
-  id: string;
-  title: string;
-  titleEn: string;
-  description: string;
-  descriptionEn: string;
-  cover: string;
-  images: string[];
-}
-
+// ============================================
+// GitHub 配置
+// ============================================
 export const GITHUB_CONFIG = {
   username: '${username}',
   repo: '${repo}',
   branch: '${branch}',
 };
 
+// ============================================
+// 后台密码哈希（SHA-256）
+// ============================================
 export const ADMIN_PASSWORD_HASH = '${ADMIN_PASSWORD_HASH}';
 
-export const GIST_CONFIG = { enabled: true };
+// ============================================
+// Gist 配置（保留，但不使用）
+// ============================================
+export const GIST_CONFIG = {
+  gistId: '',
+};
 
+// ============================================
+// 首页配置
+// ============================================
 export const HOME_CONFIG = {
   heroImage: '${homeHeroImage}',
 };
 
+// ============================================
+// 关于我配置
+// ============================================
 export const ABOUT_CONFIG = {
   name: 'GLAX',
   title: '商业 / 时尚摄影师',
-  titleEn: 'Commercial & Fashion Photographer',
   avatar: '${aboutAvatar}',
   bio: ${JSON.stringify(aboutBio.split('\n\n'))},
-  email: '${aboutEmail}',
-  instagram: '${aboutInstagram}',
-  wechat: '${aboutWechat}',
+  email: 'contact@glax.com',
+  instagram: '@glax.photo',
+  wechat: 'glax141',
 };
 
+// ============================================
+// 项目配置
+// ============================================
 export const PROJECTS: Project[] = ${JSON.stringify(projects, null, 2)};
 
+// ============================================
+// 数据统计
+// ============================================
 export const STATS = [
-  { value: '10+', label: '年经验', labelEn: 'Years' },
-  { value: '200+', label: '合作客户', labelEn: 'Clients' },
-  { value: '500+', label: '作品数量', labelEn: 'Works' },
+  { label: '年经验', value: '10+', labelEn: 'Years Experience' },
+  { label: '完成项目', value: '200+', labelEn: 'Projects Completed' },
+  { label: '国际奖项', value: '15+', labelEn: 'International Awards' },
+  { label: '满意客户', value: '100%', labelEn: 'Satisfied Clients' },
 ];
 `;
 
-      await updateGitHubFile(token, 'src/config.ts', configContent, '✅ 更新网站配置和图片');
+      await updateGitHubFile(token, 'src/config.ts', configContent, 'Update website config');
 
-      setStatus('✅ 配置已推送到 GitHub！2-3 分钟后所有设备自动更新');
+      setStatus('✅ 配置已更新！GitHub Actions 将自动构建（2-3 分钟）');
       setTimeout(() => {
         setStatus('');
         onClose();
@@ -757,35 +826,20 @@ export const STATS = [
           {/* 联系方式 */}
           {activeTab === 'contact' && (
             <div className="bg-neutral-900/50 p-6 rounded-lg border border-neutral-800">
-              <h3 className="text-lg text-white mb-4">联系方式 <span className="text-neutral-400 text-sm">Contact</span></h3>
-              <p className="text-neutral-400 text-sm mb-6">修改后点击底部「更新配置到 GitHub」即可保存</p>
+              <h3 className="text-lg text-white mb-4">联系方式</h3>
+              <p className="text-neutral-400 mb-4">联系方式在 config.ts 中配置，更新配置后会自动同步</p>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm text-neutral-400 mb-2">邮箱 Email</label>
-                  <input
-                    type="text"
-                    value={aboutEmail}
-                    onChange={(e) => setAboutEmail(e.target.value)}
-                    className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white focus:outline-none focus:border-white/50"
-                  />
+                  <input type="text" defaultValue="contact@glax.com" className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white" />
                 </div>
                 <div>
                   <label className="block text-sm text-neutral-400 mb-2">Instagram</label>
-                  <input
-                    type="text"
-                    value={aboutInstagram}
-                    onChange={(e) => setAboutInstagram(e.target.value)}
-                    className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white focus:outline-none focus:border-white/50"
-                  />
+                  <input type="text" defaultValue="@glax.photo" className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white" />
                 </div>
                 <div>
                   <label className="block text-sm text-neutral-400 mb-2">微信 WeChat</label>
-                  <input
-                    type="text"
-                    value={aboutWechat}
-                    onChange={(e) => setAboutWechat(e.target.value)}
-                    className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white focus:outline-none focus:border-white/50"
-                  />
+                  <input type="text" defaultValue="glax141" className="w-full bg-neutral-800 border border-neutral-700 rounded px-4 py-3 text-white" />
                 </div>
               </div>
             </div>
@@ -820,27 +874,28 @@ export default function App() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [carouselOffset, setCarouselOffset] = useState(0);
+  const [siteData, setSiteData] = useState<SiteData>({
+    homeHeroImage: HOME_CONFIG.heroImage,
+    aboutAvatar: ABOUT_CONFIG.avatar,
+    aboutBio: ABOUT_CONFIG.bio,
+    aboutEmail: ABOUT_CONFIG.email,
+    aboutInstagram: ABOUT_CONFIG.instagram,
+    aboutWechat: ABOUT_CONFIG.wechat,
+    projects: PROJECTS.map((p) => ({ ...p, images: [...p.images] })),
+  });
 
-  // 优先从 localStorage 读取已保存的数据，没有则用 config.ts 默认值
-  const getSavedData = () => {
-    try {
-      const raw = localStorage.getItem('glax_site_data');
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-  };
-  const savedData = getSavedData();
-  const siteProjects: Project[] = savedData?.projects || PROJECTS;
-  const siteHeroImage: string = savedData?.heroImage || HOME_CONFIG.heroImage;
-  const siteAvatar: string = savedData?.avatar || ABOUT_CONFIG.avatar;
-  const siteBio: string[] = savedData?.bio
-    ? (typeof savedData.bio === 'string' ? savedData.bio.split('\n\n') : savedData.bio)
-    : ABOUT_CONFIG.bio;
-  const siteEmail: string = savedData?.email || ABOUT_CONFIG.email;
-  const siteInstagram: string = savedData?.instagram || ABOUT_CONFIG.instagram;
-  const siteWechat: string = savedData?.wechat || ABOUT_CONFIG.wechat;
+  useEffect(() => {
+    loadImagesFromGitHub().then((restored) => {
+      setSiteData((prev) => ({
+        ...prev,
+        ...restored,
+        projects: restored.projects || prev.projects,
+      }));
+    });
+  }, []);
 
-  // 轮播图数据优化：从已保存的项目中取前 8 张
-  const carouselImages = siteProjects[0]?.images.slice(0, 8) || [];
+  // 轮播图数据优化：只加载前 8 张
+  const carouselImages = siteData.projects[0]?.images.slice(0, 8) || [];
   const extendedCarouselImages = [...carouselImages, ...carouselImages.slice(0, 3)];
 
   useEffect(() => {
@@ -939,7 +994,7 @@ export default function App() {
           <section className="relative h-screen flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0">
               <img
-                src={siteHeroImage}
+                src={siteData.homeHeroImage}
                 alt="Hero"
                 className="w-full h-full object-cover opacity-60"
                 loading="eager"
@@ -1004,7 +1059,7 @@ export default function App() {
             </h1>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {siteProjects.map((project, idx) => (
+              {siteData.projects.map((project, idx) => (
                 <div
                   key={project.id}
                   className="group cursor-pointer"
@@ -1077,7 +1132,7 @@ export default function App() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
                 <img
-                  src={siteAvatar}
+                  src={siteData.aboutAvatar}
                   alt="GLAX"
                   className="w-full aspect-[3/4] object-cover rounded"
                   loading="lazy"
@@ -1090,7 +1145,7 @@ export default function App() {
                 <p className="text-xl text-neutral-400 mb-8">{ABOUT_CONFIG.title}</p>
                 
                 <div className="space-y-6 text-neutral-300 leading-relaxed">
-                  {siteBio.map((paragraph, idx) => (
+                  {siteData.aboutBio.map((paragraph, idx) => (
                     <p key={idx}>{paragraph}</p>
                   ))}
                 </div>
@@ -1123,9 +1178,9 @@ export default function App() {
               <div>
                 <h2 className="text-2xl font-light mb-6">联系我</h2>
                 <div className="space-y-4 text-neutral-300">
-                  <p>📧 Email: <a href={`mailto:${siteEmail}`} className="text-white hover:underline">{siteEmail}</a></p>
-                  <p>📷 Instagram: <a href={`https://instagram.com/${siteInstagram?.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-white hover:underline">{siteInstagram}</a></p>
-                  <p>💬 微信：{siteWechat}</p>
+                  <p>📧 Email: <a href={`mailto:${siteData.aboutEmail}`} className="text-white hover:underline">{siteData.aboutEmail || 'contact@glax.com'}</a></p>
+                  <p>📷 Instagram: <a href={`https://instagram.com/${(siteData.aboutInstagram || '@glax.photo').replace('@', '')}`} target="_blank" rel="noreferrer" className="text-white hover:underline">{siteData.aboutInstagram || '@glax.photo'}</a></p>
+                  <p>💬 微信：{siteData.aboutWechat || 'glax141'}</p>
                 </div>
 
                 <div className="mt-8">
