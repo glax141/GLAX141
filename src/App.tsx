@@ -193,7 +193,13 @@ async function compressImage(file: File, maxWidth = 1920, quality = 0.85): Promi
 // ============================================
 // GitHub API 服务
 // ============================================
-async function updateGitHubFile(token: string, path: string, content: string, message: string) {
+async function updateGitHubFile(
+  token: string,
+  path: string,
+  content: string,
+  message: string,
+  isBase64Content = false
+) {
   const owner = GITHUB_CONFIG.username;
   const repo = GITHUB_CONFIG.repo;
   const branch = GITHUB_CONFIG.branch;
@@ -227,7 +233,7 @@ async function updateGitHubFile(token: string, path: string, content: string, me
       },
       body: JSON.stringify({
         message,
-        content: btoa(unescape(encodeURIComponent(content))),
+        content: isBase64Content ? content : btoa(unescape(encodeURIComponent(content))),
         branch,
         ...(sha && { sha }),
       }),
@@ -412,9 +418,9 @@ function AdminPanel({ onClose }: any) {
       const folder = field === 'homeHeroImage' ? 'hero' : 'avatar';
       const path = `public/images/${folder}/${fileName}`;
 
-      await updateGitHubFile(token, path, compressed.split(',')[1], `Upload ${field}`);
+      await updateGitHubFile(token, path, compressed.split(',')[1], `Upload ${field}`, true);
 
-      const imageUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${path}`;
+      const imageUrl = `https://raw.githubusercontent.com/${username}/${repo}/${branch}/${path}`;
 
       if (field === 'homeHeroImage') {
         setHomeHeroImage(imageUrl);
@@ -443,9 +449,9 @@ function AdminPanel({ onClose }: any) {
         const fileName = `${activeProject.id}-${Date.now()}-${i}.jpg`;
         const path = `public/images/${activeProject.id}/${fileName}`;
 
-        await updateGitHubFile(token, path, compressed.split(',')[1], `Upload ${fileName}`);
+        await updateGitHubFile(token, path, compressed.split(',')[1], `Upload ${fileName}`, true);
 
-        const imageUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${path}`;
+        const imageUrl = `https://raw.githubusercontent.com/${username}/${repo}/${branch}/${path}`;
         activeProject.images.push(imageUrl);
       }
 
@@ -468,9 +474,9 @@ function AdminPanel({ onClose }: any) {
       const fileName = `${activeProject.id}-cover-${Date.now()}.jpg`;
       const path = `public/images/${activeProject.id}/${fileName}`;
 
-      await updateGitHubFile(token, path, compressed.split(',')[1], `Upload cover`);
+      await updateGitHubFile(token, path, compressed.split(',')[1], `Upload cover`, true);
 
-      const imageUrl = `https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/${path}`;
+      const imageUrl = `https://raw.githubusercontent.com/${username}/${repo}/${branch}/${path}`;
       activeProject.cover = imageUrl;
 
       setProjects(projects.map(p => p.id === activeProjectId ? activeProject : p));
@@ -734,7 +740,18 @@ export const STATS = [
                   <div className="bg-neutral-900/50 p-6 rounded-lg border border-neutral-800">
                     <h3 className="text-lg text-white mb-4">封面图片</h3>
                     <div className="flex items-center gap-4">
-                      <img src={activeProject.cover} alt="Cover" className="w-32 h-32 object-cover rounded" />
+                      <img
+                        src={activeProject.cover}
+                        alt="Cover"
+                        className="w-32 h-32 object-cover rounded"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          if (target.src.includes('cdn.jsdelivr.net')) {
+                            target.src = target.src
+                              .replace(`https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/`, `https://raw.githubusercontent.com/${username}/${repo}/${branch}/`);
+                          }
+                        }}
+                      />
                       <label className="bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 rounded cursor-pointer">
                         <span className="flex items-center gap-2"><I.Upload /> 上传封面</span>
                         <input type="file" accept="image/*" onChange={handleCoverUpload} className="hidden" />
@@ -756,7 +773,18 @@ export const STATS = [
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                           {paginatedImages.map((img, idx) => (
                             <div key={idx} className="relative group">
-                              <img src={img} alt="" className="w-full aspect-square object-cover rounded" />
+                              <img
+                                src={img}
+                                alt=""
+                                className="w-full aspect-square object-cover rounded"
+                                onError={(e) => {
+                                  const target = e.currentTarget;
+                                  if (target.src.includes('cdn.jsdelivr.net')) {
+                                    target.src = target.src
+                                      .replace(`https://cdn.jsdelivr.net/gh/${username}/${repo}@${branch}/`, `https://raw.githubusercontent.com/${username}/${repo}/${branch}/`);
+                                  }
+                                }}
+                              />
                               <button
                                 onClick={() => handleDeleteImage(img)}
                                 className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
