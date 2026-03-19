@@ -1,3 +1,9 @@
+// 优化版 config.ts
+export const SITE_CONFIG = {
+  // 这里现在存储您 GitHub 仓库的图片基准路径，不再动态扫描
+  baseUrl: 'https://cdn.jsdelivr.net/gh/glax141/GLAX141@main/public/images',
+  // 其他所有配置项保持不变...
+};
 import type { Project } from './config';
 
 // ============================================
